@@ -3,6 +3,7 @@ package log
 import (
 	"errors"
 	"fmt"
+	utils "github.com/mzky/utils/files"
 	"log"
 	"os"
 	"path"
@@ -11,7 +12,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	utils "utils/files"
 )
 
 // levels
