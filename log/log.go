@@ -120,15 +120,20 @@ func (logger *Logger) doPrintf(color func(str string, modifier ...interface{}) s
 	if logger.baseLogger == nil {
 		panic("logger closed")
 	}
-
 	format = printLevel + format
 
 	str := fmt.Sprintf(format, a...)
 	if onDebugEvent != nil {
 		onDebugEvent(level, str)
 	}
+	//定位执行文件
+	if level != infoLevel {
+		logger.baseLogger.SetFlags(log.Lshortfile | log.LstdFlags)
+	} else {
+		logger.baseLogger.SetFlags(log.LstdFlags)
+	}
 	// 控制台打印
-	_ = logger.baseLogger.Output(3, color(str))
+	_ = logger.baseLogger.Output(log.LstdFlags, color(str))
 	if logger.fileLogger != nil {
 		//写文件
 		_, err := os.Stat(logFullPath)
