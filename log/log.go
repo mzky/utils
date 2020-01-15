@@ -127,7 +127,7 @@ func (logger *Logger) doPrintf(color func(str string, modifier ...interface{}) s
 		onDebugEvent(level, str)
 	}
 	//定位执行文件
-	if level != infoLevel {
+	if level > infoLevel {
 		logger.baseLogger.SetFlags(log.Lshortfile | log.LstdFlags)
 	} else {
 		logger.baseLogger.SetFlags(log.LstdFlags)
@@ -166,23 +166,23 @@ func (logger *Logger) doPrintf(color func(str string, modifier ...interface{}) s
 // }
 // logger.debug(...)
 func (logger *Logger) Debug(format string, a ...interface{}) {
-	logger.doPrintf(LightPurple, debugLevel, printDebugLevel, format, a...)
+	logger.doPrintf(green, debugLevel, printDebugLevel, format, a...)
 }
 
 func (logger *Logger) Info(format string, a ...interface{}) {
-	logger.doPrintf(DarkGray, infoLevel, printInfoLevel, format, a...)
+	logger.doPrintf(blue, infoLevel, printInfoLevel, format, a...)
 }
 
 func (logger *Logger) Warn(format string, a ...interface{}) {
-	logger.doPrintf(Brown, warnLevel, printWarnLevel, format, a...)
+	logger.doPrintf(yellow, warnLevel, printWarnLevel, format, a...)
 }
 
 func (logger *Logger) Error(format string, a ...interface{}) {
-	logger.doPrintf(LightRed, errorLevel, printErrorLevel, format, a...)
+	logger.doPrintf(red, errorLevel, printErrorLevel, format, a...)
 }
 
 func (logger *Logger) Fatal(format string, a ...interface{}) {
-	logger.doPrintf(LightGreen, fatalLevel, printFatalLevel, format, a...)
+	logger.doPrintf(cyan, fatalLevel, printFatalLevel, format, a...)
 }
 
 //第二种方式的默认级别
@@ -203,45 +203,42 @@ func Export(logger *Logger) {
 // log.Export(logger)
 // log.Debug(...)
 func Debug(format string, a ...interface{}) {
-	gLogger.doPrintf(LightPurple, debugLevel, printDebugLevel, format, a...)
+	gLogger.doPrintf(green, debugLevel, printDebugLevel, format, a...)
 }
 
 func Info(format string, a ...interface{}) {
-	gLogger.doPrintf(DarkGray, infoLevel, printInfoLevel, format, a...)
+	gLogger.doPrintf(blue, infoLevel, printInfoLevel, format, a...)
 }
 
 func Warn(format string, a ...interface{}) {
-	gLogger.doPrintf(Brown, warnLevel, printWarnLevel, format, a...)
+	gLogger.doPrintf(yellow, warnLevel, printWarnLevel, format, a...)
 }
 
 func Error(format string, a ...interface{}) {
-	gLogger.doPrintf(LightRed, errorLevel, printErrorLevel, format, a...)
+	gLogger.doPrintf(red, errorLevel, printErrorLevel, format, a...)
 }
 
 func Fatal(format string, a ...interface{}) {
-	gLogger.doPrintf(LightGreen, fatalLevel, printFatalLevel, format, a...)
+	gLogger.doPrintf(cyan, fatalLevel, printFatalLevel, format, a...)
 }
 
+//捕获错误行
 func Recover(r interface{}) {
 	buf := make([]byte, 4096)
 	l := runtime.Stack(buf, false)
-	Error("%+v: %s", r, string(buf[:l]))
+	Error("%+v: \r\n%s", r, string(buf[:l]))
 }
 
 func ReceiveMsg(format string, a ...interface{}) {
-	gLogger.doPrintf(Blue, debugLevel, printDebugLevel, format, a...)
+	gLogger.doPrintf(blue, debugLevel, printDebugLevel, format, a...)
 }
 
 func SendMsg(format string, a ...interface{}) {
-	gLogger.doPrintf(Cyan, debugLevel, printDebugLevel, format, a...)
-}
-
-func GM(format string, a ...interface{}) {
-	gLogger.doPrintf(Purple, debugLevel, printDebugLevel, format, a...)
+	gLogger.doPrintf(purple, debugLevel, printDebugLevel, format, a...)
 }
 
 func FightValueChange(format string, a ...interface{}) {
-	gLogger.doPrintf(Green, debugLevel, printDebugLevel, format, a...)
+	gLogger.doPrintf(green, debugLevel, printDebugLevel, format, a...)
 }
 
 func Close() {
@@ -249,83 +246,58 @@ func Close() {
 }
 
 //绿色字体，modifier里，第一个控制闪烁，第二个控制下划线
-func Green(str string, modifier ...interface{}) string {
-	return cliColorRender(str, 32, 0, modifier...)
-}
-
-//淡绿
-func LightGreen(str string, modifier ...interface{}) string {
+func green(str string, modifier ...interface{}) string {
 	return cliColorRender(str, 32, 1, modifier...)
 }
 
 //青色/蓝绿色
-func Cyan(str string, modifier ...interface{}) string {
-	return cliColorRender(str, 36, 0, modifier...)
-}
-
-//淡青色
-func LightCyan(str string, modifier ...interface{}) string {
+func cyan(str string, modifier ...interface{}) string {
 	return cliColorRender(str, 36, 1, modifier...)
 }
 
 //红字体
-func Red(str string, modifier ...interface{}) string {
-	return cliColorRender(str, 31, 0, modifier...)
-}
-
-//淡红色
-func LightRed(str string, modifier ...interface{}) string {
+func red(str string, modifier ...interface{}) string {
 	return cliColorRender(str, 31, 1, modifier...)
 }
 
 //黄色字体
-func Yellow(str string, modifier ...interface{}) string {
-	return cliColorRender(str, 33, 0, modifier...)
+func yellow(str string, modifier ...interface{}) string {
+	return cliColorRender(str, 33, 1, modifier...)
 }
 
 //黑色
-func Black(str string, modifier ...interface{}) string {
-	return cliColorRender(str, 30, 0, modifier...)
+func black(str string, modifier ...interface{}) string {
+	return cliColorRender(str, 30, 1, modifier...)
 }
 
 //深灰色
-func DarkGray(str string, modifier ...interface{}) string {
+func darkGray(str string, modifier ...interface{}) string {
 	return cliColorRender(str, 30, 1, modifier...)
 }
 
 //浅灰色
-func LightGray(str string, modifier ...interface{}) string {
-	return cliColorRender(str, 37, 0, modifier...)
+func lightGray(str string, modifier ...interface{}) string {
+	return cliColorRender(str, 37, 1, modifier...)
 }
 
 //白色
-func White(str string, modifier ...interface{}) string {
+func white(str string, modifier ...interface{}) string {
 	return cliColorRender(str, 37, 1, modifier...)
 }
 
 //蓝色
-func Blue(str string, modifier ...interface{}) string {
-	return cliColorRender(str, 34, 0, modifier...)
-}
-
-//淡蓝
-func LightBlue(str string, modifier ...interface{}) string {
+func blue(str string, modifier ...interface{}) string {
 	return cliColorRender(str, 34, 1, modifier...)
 }
 
 //紫色
-func Purple(str string, modifier ...interface{}) string {
-	return cliColorRender(str, 35, 0, modifier...)
-}
-
-//淡紫色
-func LightPurple(str string, modifier ...interface{}) string {
+func purple(str string, modifier ...interface{}) string {
 	return cliColorRender(str, 35, 1, modifier...)
 }
 
 //棕色
-func Brown(str string, modifier ...interface{}) string {
-	return cliColorRender(str, 33, 0, modifier...)
+func brown(str string, modifier ...interface{}) string {
+	return cliColorRender(str, 33, 1, modifier...)
 }
 
 func cliColorRender(str string, color int, weight int, extraArgs ...interface{}) string {
