@@ -121,12 +121,12 @@ func (logger *Logger) doPrintf(color func(str string, modifier ...interface{}) s
 		panic("logger closed")
 	}
 	//定位执行函数及行号
-	pc, _, _, _ := runtime.Caller(2)
+	pc, _, line, _ := runtime.Caller(2)
 	if level > infoLevel {
-		logger.baseLogger.SetFlags(log.Lshortfile | log.LstdFlags)
-		format = fmt.Sprintf("%s%s%s", runtime.FuncForPC(pc).Name(), printLevel, format)
+		//logger.baseLogger.SetFlags(log.Lshortfile | log.LstdFlags)
+		format = fmt.Sprintf("%s%v#%v:%s", printLevel, runtime.FuncForPC(pc).Name(), line, format)
 	} else {
-		logger.baseLogger.SetFlags(log.LstdFlags)
+		//logger.baseLogger.SetFlags(log.LstdFlags)
 		format = fmt.Sprintf("%s%s", printLevel, format)
 	}
 
