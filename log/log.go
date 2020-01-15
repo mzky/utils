@@ -124,10 +124,10 @@ func (logger *Logger) doPrintf(color func(str string, modifier ...interface{}) s
 	pc, _, line, _ := runtime.Caller(2)
 	if level > infoLevel {
 		//logger.baseLogger.SetFlags(log.Lshortfile | log.LstdFlags)
-		format = fmt.Sprintf("%s%v#%v:%s", printLevel, runtime.FuncForPC(pc).Name(), line, format)
+		format = fmt.Sprintf("%s <%v#%v> %s", printLevel, runtime.FuncForPC(pc).Name(), line, format)
 	} else {
 		//logger.baseLogger.SetFlags(log.LstdFlags)
-		format = fmt.Sprintf("%s%s", printLevel, format)
+		format = fmt.Sprintf("%s %s", printLevel, format)
 	}
 
 	str := fmt.Sprintf(format, a...)
