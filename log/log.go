@@ -22,11 +22,11 @@ const (
 	errorLevel = 3
 	fatalLevel = 4
 
-	printDebugLevel = "[DEBUG] "
-	printInfoLevel  = "[INFO ] "
-	printWarnLevel  = "[WARN ] "
-	printErrorLevel = "[ERROR] "
-	printFatalLevel = "[FATAL] " //此级别打印日志后自动退出
+	printDebugLevel = "[DEBUG]"
+	printInfoLevel  = "[INFO ]"
+	printWarnLevel  = "[WARN ]"
+	printErrorLevel = "[ERROR]"
+	printFatalLevel = "[FATAL]" //此级别打印日志后自动退出
 
 	logMaxLiveAge  = 24 * 60 * time.Hour //日志保留时间,单位小时,默认60天
 	logSplitTime   = 24 * time.Hour      //日志分割时间,单位小时,默认每天分割
@@ -120,18 +120,21 @@ func (logger *Logger) doPrintf(color func(str string, modifier ...interface{}) s
 	if logger.baseLogger == nil {
 		panic("logger closed")
 	}
-	format = printLevel + format
+	//定位执行函数及行号
+	pc, _, _, _ := runtime.Caller(2)
+	if level > infoLevel {
+		logger.baseLogger.SetFlags(log.Lshortfile | log.LstdFlags)
+		format = fmt.Sprintf("%s%s%s", runtime.FuncForPC(pc).Name(), printLevel, format)
+	} else {
+		logger.baseLogger.SetFlags(log.LstdFlags)
+		format = fmt.Sprintf("%s%s", printLevel, format)
+	}
 
 	str := fmt.Sprintf(format, a...)
 	if onDebugEvent != nil {
 		onDebugEvent(level, str)
 	}
-	//定位执行文件
-	if level > infoLevel {
-		logger.baseLogger.SetFlags(log.Lshortfile | log.LstdFlags)
-	} else {
-		logger.baseLogger.SetFlags(log.LstdFlags)
-	}
+
 	// 控制台打印
 	_ = logger.baseLogger.Output(log.LstdFlags, color(str))
 	if logger.fileLogger != nil {
