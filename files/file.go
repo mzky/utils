@@ -13,7 +13,6 @@ import (
 func GetFilesAndDirs(dirPth, filter string) (files []string, dirs []string, err error) {
 	dir, err := ioutil.ReadDir(dirPth)
 	if err != nil {
-		log.Println("%s路径找不到或没有权限", dirPth)
 		return nil, nil, err
 	}
 
@@ -42,7 +41,6 @@ func GetAllFiles(dirPth, filter string) (files []string, err error) {
 	var dirs []string
 	dir, err := ioutil.ReadDir(dirPth)
 	if err != nil {
-		log.Println("%s路径找不到或没有权限", dirPth)
 		return nil, err
 	}
 
@@ -74,11 +72,10 @@ func GetAllFiles(dirPth, filter string) (files []string, err error) {
 	return files, nil
 }
 
-//查找文件是否存在
+//废弃
 func FindFile(filePath string) bool {
 	_, err := os.Stat(filePath)
 	if os.IsNotExist(err) {
-		log.Println("找不到%s文件", filePath)
 		return false
 	}
 	return true
@@ -87,7 +84,7 @@ func FindFile(filePath string) bool {
 //判断文件夹或文件是否存在
 func IsExist(path string) bool {
 	_, err := os.Stat(path)
-	return !os.IsNotExist(err)
+	return os.IsExist(err)
 }
 
 //获取文件修改时间 返回unix时间戳

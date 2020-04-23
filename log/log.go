@@ -3,6 +3,7 @@ package log
 import (
     "errors"
     "fmt"
+    
     files "github.com/mzky/utils/files"
     
     "log"
@@ -43,16 +44,18 @@ type Logger struct {
 }
 
 var onDebugEvent func(logLevel int, errStr string)
-var srvName = "default"      		//服务名称
-var logDir = path.Join("/var/log/",srvName)  //log目录
+var srvName = "default"                    //服务名称
+var logDir = ""                     //log目录
 var logLevel = "debug"      		//默认日志级别
-var logFullPath = path.Join(logDir,srvName+".log")  //带后缀.log全路径地址
+var logFullPath = ""                //带后缀.log全路径地址
 var logFlag = log.LstdFlags 		//默认值3为彩色输出
 var lastTimeLog = time.Now()
+var gLogger *Logger
 
 func New(serviceName string, strLevel string, logPath string) (*Logger, error) {
-    srvName = serviceName
-    logLevel = strLevel
+    if serviceName!="" { srvName = serviceName }
+    if strLevel != ""{ logLevel = strLevel }
+    
     logDir = logPath //当为空时，写到当前目录
     logFullPath = path.Join(logDir, srvName+".log")
 
@@ -114,7 +117,8 @@ func (logger *Logger) Close() {
     logger.baseFile = nil
 }
 
-func (logger *Logger) doPrintf(color func(str string, modifier ...interface{}) string, level int, printLevel string, format string, a ...interface{}) {
+func (logger *Logger) doPrintf(color func(str string, modifier ...interface{}) string,
+                                level int, printLevel string, format string, a ...interface{}) {
     if level < logger.level {
         return
     }
@@ -139,15 +143,13 @@ func (logger *Logger) doPrintf(color func(str string, modifier ...interface{}) s
     // 控制台打印
     _ = logger.baseLogger.Output(log.LstdFlags, color(str))
     if logger.fileLogger != nil {
-        //写文件
-        _, err := os.Stat(logFullPath)
-        if os.IsNotExist(err) { //不存在日志文件
-            logger = createNewLog(logger, false)
-        } else {
+        if files.IsExist(logFullPath) {
             //文件大小超过预设时,将当前日志改名并创建新日志
             if getFileSize(logFullPath) > int64(logMaxFileSize-len(str)) {
                 logger = createNewLog(logger, true)
             }
+        } else {//不存在日志文件
+            logger = createNewLog(logger, false)
         }
         now := time.Now()
         if now.Unix() >= lastTimeLog.Add(logSplitTime).Unix() { //每天分割日志
@@ -163,12 +165,14 @@ func (logger *Logger) doPrintf(color func(str string, modifier ...interface{}) s
     }
 }
 
-// 两种实现方式,此为第一种方式:此种方式适用于功能模块的log初始化
-// logger, err := log.new(...)
-// if err != nil {
-//     log.Fatal("%s", err)
-// }
-// logger.debug(...)
+/*
+第一种方式:此种方式适用于功能模块直接使用
+logger, err := log.new(...)
+if err != nil {
+    log.Fatal("%s", err)
+}
+logger.debug(...)
+*/
 func (logger *Logger) Debug(format string, a ...interface{}) {
     logger.doPrintf(green, debugLevel, printDebugLevel, format, a...)
 }
@@ -189,23 +193,19 @@ func (logger *Logger) Fatal(format string, a ...interface{}) {
     logger.doPrintf(cyan, fatalLevel, printFatalLevel, format, a...)
 }
 
-//第二种方式的默认级别
-var gLogger, _ = New(srvName, "debug", "")
-
-// It's dangerous to call the method on logging
-func Export(logger *Logger) {
-    if logger != nil {
-        gLogger = logger
-    }
+/*
+第二种方式:此种方式适用于全局的log初始化
+logger, err := log.new(...)
+if err != nil {
+    log.Fatal("%s", err)
 }
-
-// 两种实现方式,此为第二种方式:此种方式适用于全局的log初始化
-// logger, err := log.new(...)
-// if err != nil {
-//     log.Fatal("%s", err)
-// }
-// log.Export(logger)
-// log.Debug(...)
+log.Export(logger) //重点
+log.Debug(...)
+It's dangerous to call the method on logging
+*/
+func Export(newLogger *Logger) {
+    gLogger = newLogger
+}
 func Debug(format string, a ...interface{}) {
     gLogger.doPrintf(green, debugLevel, printDebugLevel, format, a...)
 }
