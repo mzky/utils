@@ -84,6 +84,12 @@ func FindFile(filePath string) bool {
 	return true
 }
 
+//判断文件夹或文件是否存在
+func IsExist(path string) bool {
+	_, err := os.Stat(path)
+	return !os.IsNotExist(err)
+}
+
 //获取文件修改时间 返回unix时间戳
 func GetFileModTime(path string) time.Time {
 	f, err := os.Open(path)
