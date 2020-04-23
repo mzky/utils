@@ -3,7 +3,8 @@ package log
 import (
     "errors"
     "fmt"
-    utils "github.com/mzky/utils/files"
+    files "github.com/mzky/utils/files"
+    
     "log"
     "os"
     "path"
@@ -52,7 +53,7 @@ var lastTimeLog = time.Now()
 func New(serviceName string, strLevel string, logPath string) (*Logger, error) {
     srvName = serviceName
     logLevel = strLevel
-    logDir = logPath
+    logDir = logPath //当为空时，写到当前目录
     logFullPath = path.Join(logDir, srvName+".log")
 
     var level int
@@ -75,11 +76,11 @@ func New(serviceName string, strLevel string, logPath string) (*Logger, error) {
     var baseLogger *log.Logger
     var baseFile *os.File
     
-    if !utils.IsExist(logPath) {
+    if !files.IsExist(logPath) {
         os.Mkdir(logPath,os.ModePerm)
     }
     
-    if utils.IsExist(logFullPath) { //已存在日志文件（每次执行重新创建日志,已有日志文件改名）
+    if files.IsExist(logFullPath) { //已存在日志文件（每次执行重新创建日志,已有日志文件改名）
         if err := os.Rename(logFullPath, path.Join(logDir, newLogName())); err != nil {
             return nil, errors.New("检查文件或目录权限：" + logFullPath)
         }
@@ -338,9 +339,9 @@ func newLogName() string {
 
 func timeContrast() {
     now := time.Now()
-    fileArr, _ := utils.GetAllFiles(logDir, ".log")
+    fileArr, _ := files.GetAllFiles(logDir, ".log")
     for _, fi := range fileArr {
-        if now.Unix() > utils.GetFileModTime(fi).Add(logMaxLiveAge).Unix() {
+        if now.Unix() > files.GetFileModTime(fi).Add(logMaxLiveAge).Unix() {
             os.Remove(fi)
         }
     }

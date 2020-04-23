@@ -1,12 +1,12 @@
 package main
 
 import (
-	"utils/log"
+	"github.com/mzky/utils/log"
 )
 
 func main() {
 
-	logger, err := log.New("sentry", "debug", "")
+	logger, err := log.New("test", "debug", "")
 	if err != nil {
 		log.Fatal("%s", err)
 	}
