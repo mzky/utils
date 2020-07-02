@@ -15,16 +15,17 @@ import (
 type Logger struct {
 }
 
-var gLogger Logger
-
-func GenWriter(logPath string, maxRetainDay, splitTime int64) (*rotatelogs.RotateLogs, error) {
+/*
+logPath:        日志文件路径
+maxRetainDay:   文件最大保存时间,单位天
+splitTime:      日志切割时间,单位小时
+*/
+func GenWriter(logPath string, maxRetainDay, splitTime time.Duration) (*rotatelogs.RotateLogs, error) {
 	return rotatelogs.New(
 		logPath+".%Y%m%d%H%M",
-		rotatelogs.WithLinkName(logPath), // 生成软链，指向最新日志文件
-		rotatelogs.WithMaxAge(24*time.Duration(maxRetainDay)*time.Second),   // 文件最大保存时间
-		rotatelogs.WithRotationTime(3*time.Duration(splitTime)*time.Second), // 日志切割时间
-		//rotatelogs.WithMaxAge(3*24*365*time.Hour),    // 文件最大保存时间3年
-		//rotatelogs.WithRotationTime(24*30*time.Hour), // 日志切割时间间隔1个月
+		rotatelogs.WithLinkName(logPath),                 // 生成软链，指向最新日志文件
+		rotatelogs.WithMaxAge(24*maxRetainDay*time.Hour), // 文件最大保存时间
+		rotatelogs.WithRotationTime(splitTime*time.Hour), // 日志切割时间
 	)
 }
 
@@ -40,7 +41,7 @@ func New(level logrus.Level, writer *rotatelogs.RotateLogs) {
 	logrus.SetOutput(writer)
 }
 
-func (temp *Logger) Print(execute func(...interface{}), level logrus.Level, format string, a ...interface{}) {
+func logPrint(execute func(...interface{}), level logrus.Level, format string, a ...interface{}) {
 	formatMessage := fmt.Sprintf(format, a...)
 	pc, _, line, _ := runtime.Caller(2)
 	if level <= logrus.WarnLevel { //warn以上级别打印错误位置和行号
@@ -57,51 +58,51 @@ logger.Debug(...)
 */
 
 func Debug(a ...interface{}) {
-	gLogger.Print(logrus.Debug, logrus.DebugLevel, "%v", a...)
+	logPrint(logrus.Debug, logrus.DebugLevel, "%v", a...)
 }
 
 func Debugf(format string, a ...interface{}) {
-	gLogger.Print(logrus.Debug, logrus.DebugLevel, format, a...)
+	logPrint(logrus.Debug, logrus.DebugLevel, format, a...)
 }
 
 func Info(a ...interface{}) {
-	gLogger.Print(logrus.Info, logrus.InfoLevel, "%v", a...)
+	logPrint(logrus.Info, logrus.InfoLevel, "%v", a...)
 }
 
 func Infof(format string, a ...interface{}) {
-	gLogger.Print(logrus.Info, logrus.InfoLevel, format, a...)
+	logPrint(logrus.Info, logrus.InfoLevel, format, a...)
 }
 
 func Warn(a ...interface{}) {
-	gLogger.Print(logrus.Warn, logrus.WarnLevel, "%v", a...)
+	logPrint(logrus.Warn, logrus.WarnLevel, "%v", a...)
 }
 
 func Warnf(format string, a ...interface{}) {
-	gLogger.Print(logrus.Warn, logrus.WarnLevel, format, a...)
+	logPrint(logrus.Warn, logrus.WarnLevel, format, a...)
 }
 
 func Error(a ...interface{}) {
-	gLogger.Print(logrus.Error, logrus.ErrorLevel, "%v", a...)
+	logPrint(logrus.Error, logrus.ErrorLevel, "%v", a...)
 }
 
 func Errorf(format string, a ...interface{}) {
-	gLogger.Print(logrus.Error, logrus.ErrorLevel, format, a...)
+	logPrint(logrus.Error, logrus.ErrorLevel, format, a...)
 }
 
 func Fatal(a ...interface{}) {
-	gLogger.Print(logrus.Fatal, logrus.FatalLevel, "%v", a...)
+	logPrint(logrus.Fatal, logrus.FatalLevel, "%v", a...)
 }
 
 func Fatalf(format string, a ...interface{}) {
-	gLogger.Print(logrus.Fatal, logrus.FatalLevel, format, a...)
+	logPrint(logrus.Fatal, logrus.FatalLevel, format, a...)
 }
 
 func Panic(a ...interface{}) {
-	gLogger.Print(logrus.Panic, logrus.PanicLevel, "%v", a...)
+	logPrint(logrus.Panic, logrus.PanicLevel, "%v", a...)
 }
 
 func Panicf(format string, a ...interface{}) {
-	gLogger.Print(logrus.Panic, logrus.PanicLevel, format, a...)
+	logPrint(logrus.Panic, logrus.PanicLevel, format, a...)
 }
 
 // Formatter - logrus formatter, implements logrus.Formatter
