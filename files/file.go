@@ -1,15 +1,16 @@
 package util
 
 import (
+	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 	"time"
 )
 
-//获取指定目录下的所有文件和目录
+//获取指定目录下的所有文件和目录,不包含子目录
 func GetFilesAndDirs(dirPth, filter string) (files []string, dirs []string, err error) {
 	dir, err := ioutil.ReadDir(dirPth)
 	if err != nil {
@@ -72,7 +73,7 @@ func GetAllFiles(dirPth, filter string) (files []string, err error) {
 	return files, nil
 }
 
-//废弃
+//废弃,兼容旧版
 func FindFile(filePath string) bool {
 	_, err := os.Stat(filePath)
 	if os.IsNotExist(err) {
@@ -91,16 +92,23 @@ func IsExist(path string) bool {
 func GetFileModTime(path string) time.Time {
 	f, err := os.Open(path)
 	if err != nil {
-		log.Println("打开文件失败")
+		fmt.Println("打开文件失败：" + path)
 		return time.Now()
 	}
 	defer f.Close()
 
 	fi, err := f.Stat()
 	if err != nil {
-		log.Println("无法获取文件信息")
+		fmt.Println("无法获取文件信息：" + path)
 		return time.Now()
 	}
 
 	return fi.ModTime()
+}
+
+//绝对路径、目录、文件名、后缀
+func GetFilePathInfo(path string) (string, string, string) {
+	//filepath.Base(path)
+	dir, name := filepath.Split(path)    //目录、文件名
+	return dir, name, filepath.Ext(path) //后缀
 }
