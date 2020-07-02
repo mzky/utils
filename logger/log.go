@@ -29,18 +29,44 @@ func GenWriter(logPath string, maxRetainDay, splitTime time.Duration) (*rotatelo
 	)
 }
 
+type FormatterNoWriter struct{}
+
+func (f FormatterNoWriter) Format(entry *logrus.Entry) ([]byte, error) {
+	return nil, nil
+}
+
 func New(level logrus.Level, writer *rotatelogs.RotateLogs) {
 	logrus.SetLevel(level)
+	//lfHook := lfshook.NewHook(lfshook.WriterMap{
+	//	logrus.DebugLevel: writer, // 为不同级别设置不同的输出目的
+	//	logrus.InfoLevel:  writer,
+	//	logrus.WarnLevel:  writer,
+	//	logrus.ErrorLevel: writer,
+	//	logrus.FatalLevel: writer,
+	//	logrus.PanicLevel: writer,
+	//}, &FormatterNoWriter{})
+
 	logrus.SetFormatter(&Formatter{
+		CallerFirst:   true,
 		HideKeys:      true,
 		ShowFullLevel: true,
 		FieldsOrder:   []string{"component", "category"},
 	})
+	//logrus.AddHook(lfHook)
 
-	//logrus.SetOutput(io.MultiWriter(logFile, os.Stdout)) //控制台打印影响性能
+	logrus.AddHook(&DefaultFieldHook{})
 	logrus.SetOutput(writer)
 }
 
+type DefaultFieldHook struct{}
+
+func (hook *DefaultFieldHook) Fire(entry *logrus.Entry) error {
+	return nil
+}
+
+func (hook *DefaultFieldHook) Levels() []logrus.Level {
+	return logrus.AllLevels
+}
 func logPrint(execute func(...interface{}), level logrus.Level, format string, a ...interface{}) {
 	formatMessage := fmt.Sprintf(format, a...)
 	pc, _, line, _ := runtime.Caller(2)

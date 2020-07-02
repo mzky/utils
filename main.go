@@ -1,10 +1,8 @@
 package main
 
 import (
-	"net/http"
+	"time"
 	"utils/logger"
-
-	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -19,19 +17,15 @@ func test() {
 	writer, _ := logger.GenWriter(logPath, 30, 24)
 	logger.New(logger.GetLevel("debug"), writer)
 
-	r := gin.New()
-	r.GET("/", func(context *gin.Context) {
-		printLog()
-		context.JSON(http.StatusOK, "ok")
-	})
-	for i := 0; i < 1000000; i++ {
-		printLog()
+	for i := 0; i < 100000; i++ {
+		go printLog()
+		time.Sleep(time.Microsecond * 10) //协程必须加,否则线程不安全,不会保存日志
 	}
 	//logger.Panic("Panic")
 	//logger.Panicf("%sf", "Panic")
 	//logger.Fatal("fatal")         //开启后会自动退出
 	//logger.Fatalf("%sf", "fatal") //上一条已退出 本条不能执行
-	_ = r.Run(":6666")
+	//select {}
 }
 
 func printLog() {
