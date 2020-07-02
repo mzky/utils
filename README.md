@@ -6,4 +6,4 @@
 
 main函数既是测试代码也是example
 
-比较遗憾的是logrus不支持go func模式
+
