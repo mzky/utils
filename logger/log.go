@@ -6,12 +6,10 @@ import (
 	"runtime"
 	"sort"
 	"strings"
+	"time"
 
-	files "github.com/mzky/utils/files"
+	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"github.com/sirupsen/logrus"
-
-	"os"
-	"path"
 )
 
 type Logger struct {
@@ -19,20 +17,18 @@ type Logger struct {
 
 var gLogger Logger
 
-func New(level logrus.Level, logPath string) {
-	dir, _ := path.Split(logPath)
-	if !files.IsExist(dir) {
-		_ = os.MkdirAll(dir, os.ModePerm)
-	}
+func GenWriter(logPath string, maxRetainDay, splitTime int64) (*rotatelogs.RotateLogs, error) {
+	return rotatelogs.New(
+		logPath+".%Y%m%d%H%M",
+		rotatelogs.WithLinkName(logPath), // 生成软链，指向最新日志文件
+		rotatelogs.WithMaxAge(24*time.Duration(maxRetainDay)*time.Second),   // 文件最大保存时间
+		rotatelogs.WithRotationTime(3*time.Duration(splitTime)*time.Second), // 日志切割时间
+		//rotatelogs.WithMaxAge(3*24*365*time.Hour),    // 文件最大保存时间3年
+		//rotatelogs.WithRotationTime(24*30*time.Hour), // 日志切割时间间隔1个月
+	)
+}
 
-	if !files.IsExist(logPath) {
-		logFile, _ := os.Create(logPath)
-		logFile.Close()
-	}
-
-	logFile, _ := os.OpenFile(logPath, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
-
-	//logrus.SetLevel(logrus.DebugLevel)
+func New(level logrus.Level, writer *rotatelogs.RotateLogs) {
 	logrus.SetLevel(level)
 	logrus.SetFormatter(&Formatter{
 		HideKeys:      true,
@@ -41,7 +37,7 @@ func New(level logrus.Level, logPath string) {
 	})
 
 	//logrus.SetOutput(io.MultiWriter(logFile, os.Stdout)) //控制台打印影响性能
-	logrus.SetOutput(logFile)
+	logrus.SetOutput(writer)
 }
 
 func (temp *Logger) Print(execute func(...interface{}), level logrus.Level, format string, a ...interface{}) {
