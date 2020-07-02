@@ -30,7 +30,7 @@ func New(level logrus.Level, logPath string) {
 		logFile.Close()
 	}
 
-	src, _ := os.OpenFile(logPath, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
+	logFile, _ := os.OpenFile(logPath, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
 
 	//logrus.SetLevel(logrus.DebugLevel)
 	logrus.SetLevel(level)
@@ -39,15 +39,16 @@ func New(level logrus.Level, logPath string) {
 		ShowFullLevel: true,
 		FieldsOrder:   []string{"component", "category"},
 	})
-	logrus.SetOutput(src)
 
+	//logrus.SetOutput(io.MultiWriter(logFile, os.Stdout)) //控制台打印影响性能
+	logrus.SetOutput(logFile)
 }
 
 func (temp *Logger) Print(execute func(...interface{}), level logrus.Level, format string, a ...interface{}) {
 	formatMessage := fmt.Sprintf(format, a...)
 	pc, _, line, _ := runtime.Caller(2)
 	if level <= logrus.WarnLevel { //warn以上级别打印错误位置和行号
-		formatMessage = fmt.Sprintf("<%v#%v> %v",
+		formatMessage = fmt.Sprintf("<%v#%v> %s",
 			runtime.FuncForPC(pc).Name(), line, formatMessage)
 	}
 	execute(formatMessage)
@@ -286,4 +287,21 @@ func getColorByLevel(level logrus.Level) int {
 	default:
 		return colorBlue
 	}
+}
+
+func GetLevel(logLevel string) (level logrus.Level) {
+	switch strings.ToLower(logLevel) {
+	case "debug":
+		level = logrus.DebugLevel
+	case "info":
+		level = logrus.InfoLevel
+	case "warn":
+		level = logrus.WarnLevel
+	case "error":
+		level = logrus.ErrorLevel
+	default:
+		level = logrus.ErrorLevel
+	}
+
+	return level
 }

@@ -1,32 +1,32 @@
 package main
 
 import (
-	"fmt"
-	"utils/log"
+	"utils/logger"
 )
 
 func main() {
-	//级别可设置：debug|info|warn|error|fatal
+	test()
+	//fmt.Println(files.GetFilePathInfo("./test/audit.log"))
+}
+
+func test() {
+	//级别可设置：debug|info|warn|error
 	//logPath可设置相对路径也可设置绝对路径
-	logger, err := log.New("audit", "debug", "./test")
-	if err != nil {
-		fmt.Printf("%s", err)
+	logger.New(logger.GetLevel("debug"), "/root/go/src/utils/test.log")
+
+	//性能测试
+	for i := 0; i < 100000; i++ {
+		logger.Info("info")
+		logger.Infof("%sf", "info")
+		logger.Debug("debug")
+		logger.Debugf("%sf", "debug")
+		logger.Warn("warn") //warn级别以上会显示错误函数及所在行数
+		logger.Warnf("%sf", "warn")
+		logger.Error("error")
+		logger.Errorf("%sf", "error")
 	}
-	//第一种方法，局部引用
-	logger.Info("info")
-	logger.Debug("debug")
-	logger.Warn("warn")//warn级别以上会显示错误函数及所在行数
-	logger.Error("error")
-	
-	//第二种方法，全局使用
-	log.Export(logger)
-	log.Info("info")
-	log.Debug("debug")
-	log.Warn("warn")
-	log.Error("error")
-	log.ReceiveMsg("ReceiveMsg")
-	log.FightValueChange("FightValueChange")
-	log.SendMsg("SendMsg")
-	log.Recover("Recover")//recover级别会显示错误函数上下文
-	log.Fatal("fatal")//fatal级别会强制退出程序
+	logger.Panic("Panic")
+	logger.Panicf("%sf", "Panic")
+	logger.Fatal("fatal")         //开启后会自动退出
+	logger.Fatalf("%sf", "fatal") //上一条已退出 本条不能执行
 }
