@@ -3,6 +3,8 @@ package main
 import (
 	"time"
 	"utils/logger"
+
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 func main() {
@@ -13,11 +15,19 @@ func main() {
 func test() {
 	//级别可设置：debug|info|warn|error
 	//logPath可设置相对路径也可设置绝对路径
-	logPath := "/root/go/src/utils/test.log"
-	writer, _ := logger.GenWriter(logPath, 30, 24)
-	logger.New(logger.GetLevel("debug"), writer)
+	logPath := "./test.log"
+	writer := &lumberjack.Logger{
+		Filename:   logPath, // 日志文件路径
+		MaxSize:    100,     // 每个日志文件保存的最大尺寸 单位：M
+		MaxBackups: 0,       // 日志文件最多保存多少个备份
+		MaxAge:     1,       // 文件最多保存多少天
+		Compress:   true,    // 是否压缩,文本归档压缩率非常高
+		LocalTime:  true,    //取本地时区,一般需要开启
+	}
+	//isConsolePrint true时即写log文件也在控制台打印,并且控制台提供颜色输出
+	logger.New(logger.GetLevel("debug"), writer, false)
 
-	for i := 0; i < 100000; i++ {
+	for i := 0; i < 1000000; i++ {
 		go printLog()
 		time.Sleep(time.Microsecond * 10) //协程必须加,否则线程不安全,不会保存日志
 	}

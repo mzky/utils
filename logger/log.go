@@ -3,13 +3,16 @@ package logger
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"runtime"
 	"sort"
 	"strings"
 	"time"
 
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
+	"github.com/rifflock/lfshook"
 	"github.com/sirupsen/logrus"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 type Logger struct {
@@ -22,59 +25,62 @@ splitTime:      日志切割时间,单位小时
 */
 func GenWriter(logPath string, maxRetainDay, splitTime time.Duration) (*rotatelogs.RotateLogs, error) {
 	return rotatelogs.New(
-		logPath+".%Y%m%d%H%M",
+		logPath+".%Y%m%d%H%m%s",
 		rotatelogs.WithLinkName(logPath),                 // 生成软链，指向最新日志文件
 		rotatelogs.WithMaxAge(24*maxRetainDay*time.Hour), // 文件最大保存时间
 		rotatelogs.WithRotationTime(splitTime*time.Hour), // 日志切割时间
 	)
 }
 
-type FormatterNoWriter struct{}
+func New(level logrus.Level, writer *lumberjack.Logger, isConsolePrint bool) {
+	if isConsolePrint {
+		lfHook := lfshook.NewHook(lfshook.WriterMap{
+			logrus.DebugLevel: os.Stdout, // 为不同级别设置不同的输出目的,现在控制台输出
+			logrus.InfoLevel:  os.Stdout,
+			logrus.WarnLevel:  os.Stdout,
+			logrus.ErrorLevel: os.Stdout,
+			logrus.FatalLevel: os.Stdout,
+			logrus.PanicLevel: os.Stdout,
+		}, &Formatter{ //用上边的格式设置会失效
+			HideKeys:      true,
+			ShowFullLevel: true,
+			FieldsOrder:   []string{"component", "category"},
+		})
+		logrus.AddHook(lfHook)
+	} else {
+		logrus.AddHook(&NoConsolePrint{}) //日志文件名不正确
+	}
+	//}, &NoConsolePrint{ /*避免二次输出*/ })
 
-func (f FormatterNoWriter) Format(entry *logrus.Entry) ([]byte, error) {
-	return nil, nil
-}
-
-func New(level logrus.Level, writer *rotatelogs.RotateLogs) {
 	logrus.SetLevel(level)
-	//lfHook := lfshook.NewHook(lfshook.WriterMap{
-	//	logrus.DebugLevel: writer, // 为不同级别设置不同的输出目的
-	//	logrus.InfoLevel:  writer,
-	//	logrus.WarnLevel:  writer,
-	//	logrus.ErrorLevel: writer,
-	//	logrus.FatalLevel: writer,
-	//	logrus.PanicLevel: writer,
-	//}, &FormatterNoWriter{})
-
-	logrus.SetFormatter(&Formatter{
-		CallerFirst:   true,
+	logrus.SetFormatter(&Formatter{ //写log日志不需要颜色
 		HideKeys:      true,
+		NoColors:      true,
 		ShowFullLevel: true,
 		FieldsOrder:   []string{"component", "category"},
 	})
-	//logrus.AddHook(lfHook)
 
-	logrus.AddHook(&DefaultFieldHook{})
 	logrus.SetOutput(writer)
 }
 
-type DefaultFieldHook struct{}
+type NoConsolePrint struct{}
 
-func (hook *DefaultFieldHook) Fire(entry *logrus.Entry) error {
+func (hook *NoConsolePrint) Fire(entry *logrus.Entry) error {
 	return nil
 }
 
-func (hook *DefaultFieldHook) Levels() []logrus.Level {
+func (hook *NoConsolePrint) Levels() []logrus.Level {
 	return logrus.AllLevels
 }
-func logPrint(execute func(...interface{}), level logrus.Level, format string, a ...interface{}) {
+
+func logPrint(logFunc func(...interface{}), level logrus.Level, format string, a ...interface{}) {
 	formatMessage := fmt.Sprintf(format, a...)
 	pc, _, line, _ := runtime.Caller(2)
 	if level <= logrus.WarnLevel { //warn以上级别打印错误位置和行号
 		formatMessage = fmt.Sprintf("<%v#%v> %s",
 			runtime.FuncForPC(pc).Name(), line, formatMessage)
 	}
-	execute(formatMessage)
+	logFunc(formatMessage)
 }
 
 /*
