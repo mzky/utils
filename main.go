@@ -19,7 +19,7 @@ func test() {
 	writer := &lumberjack.Logger{
 		Filename:   logPath, // 日志文件路径
 		MaxSize:    100,     // 每个日志文件保存的最大尺寸 单位：M
-		MaxBackups: 0,       // 日志文件最多保存多少个备份
+		MaxBackups: 0,       // 日志文件最多保存多少个备份,0为不判断文件数量
 		MaxAge:     730,     // 文件最多保存多少天
 		Compress:   true,    // 是否压缩,文本归档压缩率非常高
 		LocalTime:  true,    //取本地时区,一般需要开启
