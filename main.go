@@ -29,7 +29,7 @@ func test() {
 
 	for i := 0; i < 1000000; i++ {
 		go printLog()
-		time.Sleep(time.Microsecond * 10) //协程必须加,否则线程不安全,不会保存日志
+		time.Sleep(time.Microsecond * 10) //循环里的协程必须加sleep,否则线程锁会导致不保存日志
 	}
 	//logger.Panic("Panic")
 	//logger.Panicf("%sf", "Panic")
