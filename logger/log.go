@@ -18,7 +18,8 @@ import (
 type Logger struct {
 }
 
-/*
+/* Date 分割方案
+rotatelogs方案存在十分秒显示为0的情况,后续根据需要进行抉择
 logPath:        日志文件路径
 maxRetainDay:   文件最大保存时间,单位天
 splitTime:      日志切割时间,单位小时
@@ -32,6 +33,7 @@ func GenWriter(logPath string, maxRetainDay, splitTime time.Duration) (*rotatelo
 	)
 }
 
+//size分割方案,提供归档压缩,压缩率高节省空间
 func New(level logrus.Level, writer *lumberjack.Logger, isConsolePrint bool) {
 	if isConsolePrint {
 		lfHook := lfshook.NewHook(lfshook.WriterMap{
