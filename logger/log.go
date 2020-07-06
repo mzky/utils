@@ -172,6 +172,14 @@ func Panicf(format string, a ...interface{}) {
 	messagePrint(logrus.Panic, logrus.PanicLevel, format, a...)
 }
 
+func Trace(a ...interface{}) {
+	messagePrint(logrus.Trace, logrus.TraceLevel, "%v", a...)
+}
+
+func Tracef(format string, a ...interface{}) {
+	messagePrint(logrus.Trace, logrus.TraceLevel, format, a...)
+}
+
 // Formatter - logrus formatter, implements logrus.Formatter
 type Formatter struct {
 	// FieldsOrder - default: fields sorted alphabetically
