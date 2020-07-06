@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/mzky/utils/logger"
-
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
@@ -35,12 +34,13 @@ func test() {
 	//writerForDate, _ := logger.GenWriter(logPath2, 1, 1)
 	//logger.NewForDate(logger.GetLevel("debug"), writerForDate, false)
 	//printLog()
-	//
+
 	////性能测试
 	//for i := 0; i < 1000000; i++ {
 	//	go printLog()                     //性能测试过程建议关闭控制台输出，避免内存占用过高卡死ide
 	//	time.Sleep(time.Microsecond * 10) //循环里的协程必须加sleep,否则线程锁会导致不保存日志文件
 	//}
+
 	//logger.Panic("Panic")
 	//logger.Panicf("%sf", "Panic")
 	//logger.Fatal("fatal")         //开启后会自动退出
