@@ -3,6 +3,7 @@ module utils
 go 1.14
 
 require (
+	github.com/BurntSushi/toml v0.3.1 // indirect
 	github.com/fastly/go-utils v0.0.0-20180712184237-d95a45783239 // indirect
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869 // indirect
 	github.com/jonboulle/clockwork v0.1.0 // indirect
@@ -14,4 +15,8 @@ require (
 	github.com/tebeka/strftime v0.1.4 // indirect
 	golang.org/x/sys v0.0.0-20200223170610-d5e6a3e2c0ae // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
+	gopkg.in/yaml.v2 v2.3.0 // indirect
+	github.com/mzky/utils v0.0.0-20200706043322-d6fc103ad828
 )
+
+replace github.com/mzky/utils => ../utils

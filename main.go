@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/mzky/utils/logger"
-
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
