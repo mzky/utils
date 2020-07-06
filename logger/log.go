@@ -18,7 +18,7 @@ import (
 type Logger struct {
 }
 
-/* Date 分割方案
+/* Date分割方案
 rotatelogs方案存在十分秒显示为0的情况,后续根据需要进行抉择
 logPath:        日志文件路径
 maxRetainDay:   文件最大保存时间,单位天
@@ -26,11 +26,44 @@ splitTime:      日志切割时间,单位小时
 */
 func GenWriter(logPath string, maxRetainDay, splitTime time.Duration) (*rotatelogs.RotateLogs, error) {
 	return rotatelogs.New(
-		logPath+".%Y%m%d%H%m%s",
+		strings.Join([]string{logPath, "%Y%m%d%H%M%S"}, "."),
 		rotatelogs.WithLinkName(logPath),                 // 生成软链，指向最新日志文件
 		rotatelogs.WithMaxAge(24*maxRetainDay*time.Hour), // 文件最大保存时间
 		rotatelogs.WithRotationTime(splitTime*time.Hour), // 日志切割时间
+		rotatelogs.WithClock(rotatelogs.Local),           // 本地时间
 	)
+}
+
+//date分割方案
+func NewForDate(level logrus.Level, writer *rotatelogs.RotateLogs, isConsolePrint bool) {
+	if isConsolePrint {
+		lfHook := lfshook.NewHook(lfshook.WriterMap{
+			logrus.DebugLevel: os.Stdout, // 为不同级别设置不同的输出目的,现在控制台输出
+			logrus.InfoLevel:  os.Stdout,
+			logrus.WarnLevel:  os.Stdout,
+			logrus.ErrorLevel: os.Stdout,
+			logrus.FatalLevel: os.Stdout,
+			logrus.PanicLevel: os.Stdout,
+		}, &Formatter{ //用上边的格式设置会失效
+			HideKeys:      true,
+			ShowFullLevel: true,
+			FieldsOrder:   []string{"component", "category"},
+		})
+		logrus.AddHook(lfHook)
+	} else {
+		logrus.AddHook(&NoConsolePrint{})
+	}
+	//}, &NoConsolePrint{ /*避免二次输出*/ })
+
+	logrus.SetLevel(level)
+	logrus.SetFormatter(&Formatter{ //写log日志不需要颜色
+		HideKeys:      true,
+		NoColors:      true,
+		ShowFullLevel: true,
+		FieldsOrder:   []string{"component", "category"},
+	})
+
+	logrus.SetOutput(writer)
 }
 
 //size分割方案,提供归档压缩,压缩率高节省空间
@@ -75,7 +108,7 @@ func (hook *NoConsolePrint) Levels() []logrus.Level {
 	return logrus.AllLevels
 }
 
-func logPrint(logFunc func(...interface{}), level logrus.Level, format string, a ...interface{}) {
+func messagePrint(logFunc func(...interface{}), level logrus.Level, format string, a ...interface{}) {
 	formatMessage := fmt.Sprintf(format, a...)
 	pc, _, line, _ := runtime.Caller(2)
 	if level <= logrus.WarnLevel { //warn以上级别打印错误位置和行号
@@ -92,51 +125,51 @@ logger.Debug(...)
 */
 
 func Debug(a ...interface{}) {
-	logPrint(logrus.Debug, logrus.DebugLevel, "%v", a...)
+	messagePrint(logrus.Debug, logrus.DebugLevel, "%v", a...)
 }
 
 func Debugf(format string, a ...interface{}) {
-	logPrint(logrus.Debug, logrus.DebugLevel, format, a...)
+	messagePrint(logrus.Debug, logrus.DebugLevel, format, a...)
 }
 
 func Info(a ...interface{}) {
-	logPrint(logrus.Info, logrus.InfoLevel, "%v", a...)
+	messagePrint(logrus.Info, logrus.InfoLevel, "%v", a...)
 }
 
 func Infof(format string, a ...interface{}) {
-	logPrint(logrus.Info, logrus.InfoLevel, format, a...)
+	messagePrint(logrus.Info, logrus.InfoLevel, format, a...)
 }
 
 func Warn(a ...interface{}) {
-	logPrint(logrus.Warn, logrus.WarnLevel, "%v", a...)
+	messagePrint(logrus.Warn, logrus.WarnLevel, "%v", a...)
 }
 
 func Warnf(format string, a ...interface{}) {
-	logPrint(logrus.Warn, logrus.WarnLevel, format, a...)
+	messagePrint(logrus.Warn, logrus.WarnLevel, format, a...)
 }
 
 func Error(a ...interface{}) {
-	logPrint(logrus.Error, logrus.ErrorLevel, "%v", a...)
+	messagePrint(logrus.Error, logrus.ErrorLevel, "%v", a...)
 }
 
 func Errorf(format string, a ...interface{}) {
-	logPrint(logrus.Error, logrus.ErrorLevel, format, a...)
+	messagePrint(logrus.Error, logrus.ErrorLevel, format, a...)
 }
 
 func Fatal(a ...interface{}) {
-	logPrint(logrus.Fatal, logrus.FatalLevel, "%v", a...)
+	messagePrint(logrus.Fatal, logrus.FatalLevel, "%v", a...)
 }
 
 func Fatalf(format string, a ...interface{}) {
-	logPrint(logrus.Fatal, logrus.FatalLevel, format, a...)
+	messagePrint(logrus.Fatal, logrus.FatalLevel, format, a...)
 }
 
 func Panic(a ...interface{}) {
-	logPrint(logrus.Panic, logrus.PanicLevel, "%v", a...)
+	messagePrint(logrus.Panic, logrus.PanicLevel, "%v", a...)
 }
 
 func Panicf(format string, a ...interface{}) {
-	logPrint(logrus.Panic, logrus.PanicLevel, format, a...)
+	messagePrint(logrus.Panic, logrus.PanicLevel, format, a...)
 }
 
 // Formatter - logrus formatter, implements logrus.Formatter

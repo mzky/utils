@@ -1,7 +1,6 @@
 package main
 
 import (
-	"time"
 	"utils/logger"
 
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -15,7 +14,8 @@ func main() {
 func test() {
 	//级别可设置：debug|info|warn|error
 	//logPath可设置相对路径也可设置绝对路径
-	logPath := "./test.log"
+	//文件大小分割
+	logPath := "./sizeSplit.log"
 	writer := &lumberjack.Logger{
 		Filename:   logPath, // 日志文件路径
 		MaxSize:    100,     // 每个日志文件保存的最大尺寸,单位：M
@@ -26,11 +26,20 @@ func test() {
 	}
 	//isConsolePrint true时即写log文件也在控制台打印,并且控制台提供颜色输出
 	logger.New(logger.GetLevel("debug"), writer, false)
+	printLog()
 
-	for i := 0; i < 1000000; i++ {
-		go printLog()
-		time.Sleep(time.Microsecond * 10) //循环里的协程必须加sleep,否则线程锁会导致不保存日志
-	}
+	//时间分割
+	logPath2 := "./dateSplit.log"
+	//文件名只能精确到小时，分秒为0000，此问题待解
+	writerForDate, _ := logger.GenWriter(logPath2, 1, 1)
+	logger.NewForDate(logger.GetLevel("debug"), writerForDate, false)
+	printLog()
+
+	//性能测试
+	//for i := 0; i < 1000000; i++ {
+	//	go printLog()
+	//	time.Sleep(time.Microsecond * 10) //循环里的协程必须加sleep,否则线程锁会导致不保存日志
+	//}
 	//logger.Panic("Panic")
 	//logger.Panicf("%sf", "Panic")
 	//logger.Fatal("fatal")         //开启后会自动退出
