@@ -13,3 +13,14 @@
 测试代码和例子见example
 
 
+#
+
+感谢：
+
+github.com/sirupsen/logrus
+
+github.com/lestrrat-go/file-rotatelogs v2.3.0+incompatible
+
+github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5
+
+gopkg.in/natefinch/lumberjack.v2 v2.0.0
