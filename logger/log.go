@@ -49,7 +49,7 @@ func NewForDate(level logrus.Level, writer *rotatelogs.RotateLogs, isConsolePrin
 		}, &Formatter{ //用上边的格式设置会失效
 			HideKeys:      true,
 			ShowFullLevel: true,
-			FieldsOrder:   []string{"component", "category"},
+			//FieldsOrder:   []string{"component", "category"},
 		})
 		logrus.AddHook(lfHook)
 	} else {
@@ -62,7 +62,7 @@ func NewForDate(level logrus.Level, writer *rotatelogs.RotateLogs, isConsolePrin
 		HideKeys:      true,
 		NoColors:      true,
 		ShowFullLevel: true,
-		FieldsOrder:   []string{"component", "category"},
+		//FieldsOrder:   []string{"component", "category"},
 	})
 
 	logrus.SetOutput(writer)
