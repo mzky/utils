@@ -50,7 +50,7 @@ func New(level logrus.Level, writer *lumberjack.Logger, isConsolePrint bool) {
 		})
 		logrus.AddHook(lfHook)
 	} else {
-		logrus.AddHook(&NoConsolePrint{}) //日志文件名不正确
+		logrus.AddHook(&NoConsolePrint{})
 	}
 	//}, &NoConsolePrint{ /*避免二次输出*/ })
 
