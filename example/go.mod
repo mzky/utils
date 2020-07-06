@@ -19,4 +19,3 @@ require (
 	github.com/mzky/utils v0.0.0-20200706043322-d6fc103ad828
 )
 
-replace github.com/mzky/utils => ../utils
