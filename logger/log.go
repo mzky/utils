@@ -111,7 +111,11 @@ func (hook *NoConsolePrint) Levels() []logrus.Level {
 }
 
 func messagePrint(logFunc func(...interface{}), level logrus.Level, format string, a ...interface{}) {
-	formatMessage := fmt.Sprintf(format, a...)
+	formatMessage := fmt.Sprint(a...)
+	if format != "" {
+		formatMessage = fmt.Sprintf(format, a...)
+	}
+
 	pc, _, line, _ := runtime.Caller(2)
 	if level <= logrus.WarnLevel { //warn以上级别打印错误位置和行号
 		formatMessage = fmt.Sprintf("<%v#%v> %s",
@@ -127,7 +131,7 @@ logger.Debug(...)
 */
 
 func Debug(a ...interface{}) {
-	messagePrint(logrus.Debug, logrus.DebugLevel, "%v", a...)
+	messagePrint(logrus.Debug, logrus.DebugLevel, "", a...)
 }
 
 func Debugf(format string, a ...interface{}) {
@@ -135,7 +139,7 @@ func Debugf(format string, a ...interface{}) {
 }
 
 func Info(a ...interface{}) {
-	messagePrint(logrus.Info, logrus.InfoLevel, "%v", a...)
+	messagePrint(logrus.Info, logrus.InfoLevel, "", a...)
 }
 
 func Infof(format string, a ...interface{}) {
@@ -143,7 +147,7 @@ func Infof(format string, a ...interface{}) {
 }
 
 func Warn(a ...interface{}) {
-	messagePrint(logrus.Warn, logrus.WarnLevel, "%v", a...)
+	messagePrint(logrus.Warn, logrus.WarnLevel, "", a...)
 }
 
 func Warnf(format string, a ...interface{}) {
@@ -151,7 +155,7 @@ func Warnf(format string, a ...interface{}) {
 }
 
 func Error(a ...interface{}) {
-	messagePrint(logrus.Error, logrus.ErrorLevel, "%v", a...)
+	messagePrint(logrus.Error, logrus.ErrorLevel, "", a...)
 }
 
 func Errorf(format string, a ...interface{}) {
@@ -159,7 +163,7 @@ func Errorf(format string, a ...interface{}) {
 }
 
 func Fatal(a ...interface{}) {
-	messagePrint(logrus.Fatal, logrus.FatalLevel, "%v", a...)
+	messagePrint(logrus.Fatal, logrus.FatalLevel, "", a...)
 }
 
 func Fatalf(format string, a ...interface{}) {
@@ -167,7 +171,7 @@ func Fatalf(format string, a ...interface{}) {
 }
 
 func Panic(a ...interface{}) {
-	messagePrint(logrus.Panic, logrus.PanicLevel, "%v", a...)
+	messagePrint(logrus.Panic, logrus.PanicLevel, "", a...)
 }
 
 func Panicf(format string, a ...interface{}) {
@@ -175,7 +179,7 @@ func Panicf(format string, a ...interface{}) {
 }
 
 func Trace(a ...interface{}) {
-	messagePrint(logrus.Trace, logrus.TraceLevel, "%v", a...)
+	messagePrint(logrus.Trace, logrus.TraceLevel, "", a...)
 }
 
 func Tracef(format string, a ...interface{}) {
