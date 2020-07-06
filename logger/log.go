@@ -18,6 +18,8 @@ import (
 type Logger struct {
 }
 
+type Fields logrus.Fields
+
 /* Date分割方案
 rotatelogs方案存在十分秒显示为0的情况,后续根据需要进行抉择
 logPath:        日志文件路径
@@ -79,7 +81,7 @@ func New(level logrus.Level, writer *lumberjack.Logger, isConsolePrint bool) {
 		}, &Formatter{ //用上边的格式设置会失效
 			HideKeys:      true,
 			ShowFullLevel: true,
-			FieldsOrder:   []string{"component", "category"},
+			//FieldsOrder:   []string{"component", "category"},//貌似没什么用
 		})
 		logrus.AddHook(lfHook)
 	} else {
@@ -92,7 +94,7 @@ func New(level logrus.Level, writer *lumberjack.Logger, isConsolePrint bool) {
 		HideKeys:      true,
 		NoColors:      true,
 		ShowFullLevel: true,
-		FieldsOrder:   []string{"component", "category"},
+		//FieldsOrder:   []string{"component", "category"},
 	})
 
 	logrus.SetOutput(writer)
@@ -178,6 +180,14 @@ func Trace(a ...interface{}) {
 
 func Tracef(format string, a ...interface{}) {
 	messagePrint(logrus.Trace, logrus.TraceLevel, format, a...)
+}
+
+func WithField(key string, value interface{}) *logrus.Entry {
+	return logrus.WithField(key, value)
+}
+
+func WithFields(fields Fields) *logrus.Entry {
+	return logrus.WithFields(logrus.Fields(fields))
 }
 
 // Formatter - logrus formatter, implements logrus.Formatter

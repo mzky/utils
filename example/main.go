@@ -1,9 +1,8 @@
 package main
 
 import (
-	"time"
-
 	"github.com/mzky/utils/logger"
+
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
@@ -30,18 +29,18 @@ func test() {
 	logger.New(logger.GetLevel("debug"), writer, false)
 	printLog()
 
-	//时间分割方式，两种方式同时仅生效最后一个设置
-	logPath2 := "./dateSplit.log"
-	//文件名只能精确到小时，分秒为0000，此问题待解
-	writerForDate, _ := logger.GenWriter(logPath2, 1, 1)
-	logger.NewForDate(logger.GetLevel("debug"), writerForDate, false)
-	printLog()
-
-	//性能测试
-	for i := 0; i < 1000000; i++ {
-		go printLog()                     //性能测试过程建议关闭控制台输出，避免内存占用过高卡死ide
-		time.Sleep(time.Microsecond * 10) //循环里的协程必须加sleep,否则线程锁会导致不保存日志文件
-	}
+	////时间分割方式，两种方式同时仅生效最后一个设置
+	//logPath2 := "./dateSplit.log"
+	////文件名只能精确到小时，分秒为0000，此问题待解
+	//writerForDate, _ := logger.GenWriter(logPath2, 1, 1)
+	//logger.NewForDate(logger.GetLevel("debug"), writerForDate, false)
+	//printLog()
+	//
+	////性能测试
+	//for i := 0; i < 1000000; i++ {
+	//	go printLog()                     //性能测试过程建议关闭控制台输出，避免内存占用过高卡死ide
+	//	time.Sleep(time.Microsecond * 10) //循环里的协程必须加sleep,否则线程锁会导致不保存日志文件
+	//}
 	//logger.Panic("Panic")
 	//logger.Panicf("%sf", "Panic")
 	//logger.Fatal("fatal")         //开启后会自动退出
@@ -58,4 +57,11 @@ func printLog() {
 	logger.Warnf("%sf", "warn")
 	logger.Error("error")
 	logger.Errorf("%sf", "error")
+
+	logger.WithField("key", "value").Info("WithField")
+	logger.WithFields(logger.Fields{"key": "value"}).Warn("WithFields")
+	logger.WithFields(logger.Fields{
+		"component": "component_value",
+		"category":  "category_value"}).Error("WithFields")
+
 }
