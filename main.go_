@@ -2,7 +2,8 @@ package main
 
 import (
 	"time"
-	"utils/logger"
+
+	"github.com/mzky/utils/logger"
 
 	"gopkg.in/natefinch/lumberjack.v2"
 )
