@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/mzky/utils/logger"
-	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 func main() {
@@ -13,27 +12,20 @@ func main() {
 func test() {
 	//级别可设置：debug|info|warn|error
 	//logPath可设置相对路径也可设置绝对路径
+	//isConsolePrint true时即写log文件也在控制台打印,并且控制台提供颜色输出
 
 	//文件大小分割，建议使用此方法，归档压缩率高，节省空间
 	logPath := "./sizeSplit.log"
-	writer := &lumberjack.Logger{
-		Filename:   logPath, // 日志文件路径
-		MaxSize:    100,     // 每个日志文件保存的最大尺寸,单位：M
-		MaxBackups: 0,       // 日志文件最多保存多少个备份,0为不判断文件数量
-		MaxAge:     730,     // 文件最多保存多少天
-		Compress:   true,    // 是否压缩,文本归档压缩率非常高
-		LocalTime:  true,    // 取本地时区,一般需要开启
-	}
-	//isConsolePrint true时即写log文件也在控制台打印,并且控制台提供颜色输出
-	logger.New(logger.GetLevel("debug"), writer, false)
+	sizeWriter := logger.SizeWriter(logPath, 100, 730)
+	logger.New(logger.GetLevel("debug"), sizeWriter, false)
 	printLog()
 
-	////时间分割方式，两种方式同时仅生效最后一个设置
-	//logPath2 := "./dateSplit.log"
-	////文件名只能精确到小时，分秒为0000，此问题待解
-	//writerForDate, _ := logger.GenWriter(logPath2, 1, 1)
-	//logger.NewForDate(logger.GetLevel("debug"), writerForDate, false)
-	//printLog()
+	//时间分割方式，两种方式同时仅生效最后一个设置
+	logPath2 := "./dateSplit.log"
+	//文件名只能精确到小时，分秒为0000，此问题待解
+	dateWriter, _ := logger.DateWriter(logPath2, 1, 1)
+	logger.New(logger.GetLevel("debug"), dateWriter, false)
+	printLog()
 
 	////性能测试
 	//for i := 0; i < 1000000; i++ {

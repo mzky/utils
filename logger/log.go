@@ -3,6 +3,7 @@ package logger
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"runtime"
 	"sort"
@@ -26,7 +27,7 @@ logPath:        日志文件路径
 maxRetainDay:   文件最大保存时间,单位天
 splitTime:      日志切割时间,单位小时
 */
-func GenWriter(logPath string, maxRetainDay, splitTime time.Duration) (*rotatelogs.RotateLogs, error) {
+func DateWriter(logPath string, maxRetainDay, splitTime time.Duration) (*rotatelogs.RotateLogs, error) {
 	return rotatelogs.New(
 		strings.Join([]string{logPath, "%Y%m%d%H%M%S"}, "."),
 		rotatelogs.WithLinkName(logPath),                 // 生成软链，指向最新日志文件
@@ -36,40 +37,19 @@ func GenWriter(logPath string, maxRetainDay, splitTime time.Duration) (*rotatelo
 	)
 }
 
-//date分割方案
-func NewForDate(level logrus.Level, writer *rotatelogs.RotateLogs, isConsolePrint bool) {
-	if isConsolePrint {
-		lfHook := lfshook.NewHook(lfshook.WriterMap{
-			logrus.DebugLevel: os.Stdout, // 为不同级别设置不同的输出目的,现在控制台输出
-			logrus.InfoLevel:  os.Stdout,
-			logrus.WarnLevel:  os.Stdout,
-			logrus.ErrorLevel: os.Stdout,
-			logrus.FatalLevel: os.Stdout,
-			logrus.PanicLevel: os.Stdout,
-		}, &Formatter{ //用上边的格式设置会失效
-			HideKeys:      true,
-			ShowFullLevel: true,
-			//FieldsOrder:   []string{"component", "category"},
-		})
-		logrus.AddHook(lfHook)
-	} else {
-		logrus.AddHook(&NoConsolePrint{})
+func SizeWriter(logPath string, maxSize, maxAge int) *lumberjack.Logger {
+	return &lumberjack.Logger{
+		Filename:   logPath, // 日志文件路径
+		MaxSize:    maxSize, // 每个日志文件保存的最大尺寸,单位：M
+		MaxBackups: 0,       // 日志文件最多保存多少个备份,0为不判断文件数量
+		MaxAge:     maxAge,  // 文件最多保存多少天
+		Compress:   true,    // 是否压缩,文本归档压缩率非常高
+		LocalTime:  true,    // 取本地时区,一般需要开启
 	}
-	//}, &NoConsolePrint{ /*避免二次输出*/ })
-
-	logrus.SetLevel(level)
-	logrus.SetFormatter(&Formatter{ //写log日志不需要颜色
-		HideKeys:      true,
-		NoColors:      true,
-		ShowFullLevel: true,
-		//FieldsOrder:   []string{"component", "category"},
-	})
-
-	logrus.SetOutput(writer)
 }
 
-//size分割方案,提供归档压缩,压缩率高节省空间
-func New(level logrus.Level, writer *lumberjack.Logger, isConsolePrint bool) {
+//writer可以为date分割方案也可以为size分割方案,size方案提供归档压缩,压缩率高节省空间
+func New(level logrus.Level, writer io.Writer, isConsolePrint bool) {
 	if isConsolePrint {
 		lfHook := lfshook.NewHook(lfshook.WriterMap{
 			logrus.DebugLevel: os.Stdout, // 为不同级别设置不同的输出目的,现在控制台输出
@@ -81,20 +61,17 @@ func New(level logrus.Level, writer *lumberjack.Logger, isConsolePrint bool) {
 		}, &Formatter{ //用上边的格式设置会失效
 			HideKeys:      true,
 			ShowFullLevel: true,
-			//FieldsOrder:   []string{"component", "category"},//貌似没什么用
 		})
 		logrus.AddHook(lfHook)
 	} else {
 		logrus.AddHook(&NoConsolePrint{})
 	}
-	//}, &NoConsolePrint{ /*避免二次输出*/ })
 
 	logrus.SetLevel(level)
 	logrus.SetFormatter(&Formatter{ //写log日志不需要颜色
 		HideKeys:      true,
 		NoColors:      true,
 		ShowFullLevel: true,
-		//FieldsOrder:   []string{"component", "category"},
 	})
 
 	logrus.SetOutput(writer)
@@ -230,7 +207,7 @@ func (f *Formatter) Format(entry *logrus.Entry) ([]byte, error) {
 
 	timestampFormat := f.TimestampFormat
 	if timestampFormat == "" {
-		timestampFormat = "2006-01-02_15:04:05.000"
+		timestampFormat = "2006-01-02 15:04:05.000"
 	}
 
 	// output buffer
