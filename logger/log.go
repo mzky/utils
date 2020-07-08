@@ -21,8 +21,23 @@ type Logger struct {
 
 type Fields logrus.Fields
 
+/* Size分割方案
+logPath:        日志文件路径
+maxSize:        每个日志文件保存的最大尺寸,单位：M
+maxAge:         文件最多保存多少天
+*/
+func SizeWriter(logPath string, maxSize, maxAge int) *lumberjack.Logger {
+	return &lumberjack.Logger{
+		Filename:   logPath, // 日志文件路径
+		MaxSize:    maxSize, // 每个日志文件保存的最大尺寸,单位：M
+		MaxBackups: 0,       // 日志文件最多保存多少个备份,0为不判断文件数量
+		MaxAge:     maxAge,  // 文件最多保存多少天
+		Compress:   true,    // 是否压缩,文本归档压缩率非常高
+		LocalTime:  true,    // 取本地时区,一般需要开启
+	}
+}
+
 /* Date分割方案
-rotatelogs方案存在十分秒显示为0的情况,后续根据需要进行抉择
 logPath:        日志文件路径
 maxRetainDay:   文件最大保存时间,单位天
 splitTime:      日志切割时间,单位小时
@@ -35,17 +50,6 @@ func DateWriter(logPath string, maxRetainDay, splitTime time.Duration) (*rotatel
 		rotatelogs.WithRotationTime(splitTime*time.Hour), // 日志切割时间
 		rotatelogs.WithClock(rotatelogs.Local),           // 本地时间
 	)
-}
-
-func SizeWriter(logPath string, maxSize, maxAge int) *lumberjack.Logger {
-	return &lumberjack.Logger{
-		Filename:   logPath, // 日志文件路径
-		MaxSize:    maxSize, // 每个日志文件保存的最大尺寸,单位：M
-		MaxBackups: 0,       // 日志文件最多保存多少个备份,0为不判断文件数量
-		MaxAge:     maxAge,  // 文件最多保存多少天
-		Compress:   true,    // 是否压缩,文本归档压缩率非常高
-		LocalTime:  true,    // 取本地时区,一般需要开启
-	}
 }
 
 //writer可以为date分割方案也可以为size分割方案,size方案提供归档压缩,压缩率高节省空间
