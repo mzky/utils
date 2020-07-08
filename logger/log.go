@@ -24,7 +24,7 @@ type Fields logrus.Fields
 /* Size分割方案
 logPath:        日志文件路径
 maxSize:        每个日志文件保存的最大尺寸,单位：M
-maxAge:         文件最多保存多少天
+maxAge:         文件最多保存时间,单位：天
 */
 func SizeWriter(logPath string, maxSize, maxAge int) *lumberjack.Logger {
 	return &lumberjack.Logger{
@@ -39,8 +39,8 @@ func SizeWriter(logPath string, maxSize, maxAge int) *lumberjack.Logger {
 
 /* Date分割方案
 logPath:        日志文件路径
-maxRetainDay:   文件最大保存时间,单位天
-splitTime:      日志切割时间,单位小时
+maxRetainDay:   文件最大保存时间,单位:天
+splitTime:      日志切割时间,单位:小时
 */
 func DateWriter(logPath string, maxRetainDay, splitTime time.Duration) (*rotatelogs.RotateLogs, error) {
 	return rotatelogs.New(
@@ -228,7 +228,7 @@ func (f *Formatter) Format(entry *logrus.Entry) ([]byte, error) {
 	}
 
 	if !f.NoColors {
-		fmt.Fprintf(b, "\x1b[%dm", levelColor)
+		_, _ = fmt.Fprintf(b, "\x1b[%dm", levelColor)
 	}
 
 	b.WriteString(" [")
@@ -273,9 +273,9 @@ func (f *Formatter) Format(entry *logrus.Entry) ([]byte, error) {
 func (f *Formatter) writeCaller(b *bytes.Buffer, entry *logrus.Entry) {
 	if entry.HasCaller() {
 		if f.CustomCallerFormatter != nil {
-			fmt.Fprintf(b, f.CustomCallerFormatter(entry.Caller))
+			_, _ = fmt.Fprintf(b, f.CustomCallerFormatter(entry.Caller))
 		} else {
-			fmt.Fprintf(
+			_, _ = fmt.Fprintf(
 				b,
 				" (%s:%d %s)",
 				entry.Caller.File,
@@ -330,9 +330,9 @@ func (f *Formatter) writeOrderedFields(b *bytes.Buffer, entry *logrus.Entry) {
 
 func (f *Formatter) writeField(b *bytes.Buffer, entry *logrus.Entry, field string) {
 	if f.HideKeys {
-		fmt.Fprintf(b, "[%v] ", entry.Data[field])
+		_, _ = fmt.Fprintf(b, "[%v] ", entry.Data[field])
 	} else {
-		fmt.Fprintf(b, "[%s:%v] ", field, entry.Data[field])
+		_, _ = fmt.Fprintf(b, "[%s:%v] ", field, entry.Data[field])
 	}
 }
 

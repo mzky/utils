@@ -23,17 +23,17 @@ func main() {
 func size() {
 	//文件大小分割，建议使用此方法，归档压缩率高，节省空间
 	logPath := "./sizeSplit.log"
-	sizeWriter := logger.SizeWriter(logPath, 100, 730)
-	logger.New(logger.GetLevel("debug"), sizeWriter, false)
+	writer := logger.SizeWriter(logPath, 100, 730)
+	logger.New(logger.GetLevel("debug"), writer, false)
 	printLog()
 }
 
 func date() {
 	//时间分割方式，两种方式同时仅生效最后一个设置
-	logPath2 := "./dateSplit.log"
+	logPath := "./dateSplit.log"
 	//文件名只能精确到小时，分秒为0000，此问题待解
-	dateWriter, _ := logger.DateWriter(logPath2, 1, 1)
-	logger.New(logger.GetLevel("debug"), dateWriter, false)
+	writer, _ := logger.DateWriter(logPath, 1, 1)
+	logger.New(logger.GetLevel("debug"), writer, false)
 	printLog()
 }
 
