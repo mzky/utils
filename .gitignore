@@ -1,0 +1,5 @@
+/go.mod
+/go.sum
+/example/customSplit.log
+/example/dateSplit.log*
+/example/sizeSplit.log

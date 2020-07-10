@@ -52,6 +52,11 @@ func DateWriter(logPath string, maxRetainDay, splitTime time.Duration) (*rotatel
 	)
 }
 
+//自定义日志格式，可参考new方法
+func NewCustom(custom func()) {
+	custom()
+}
+
 //writer可以为date分割方案也可以为size分割方案,size方案提供归档压缩,压缩率高节省空间
 func New(level logrus.Level, writer io.Writer, isConsolePrint bool) {
 	if isConsolePrint {
@@ -63,7 +68,8 @@ func New(level logrus.Level, writer io.Writer, isConsolePrint bool) {
 			logrus.FatalLevel: os.Stdout,
 			logrus.PanicLevel: os.Stdout,
 		}, &Formatter{ //用上边的格式设置会失效
-			HideKeys:      true,
+			HideKeys:      false,
+			NoColors:      false,
 			ShowFullLevel: true,
 		})
 		logrus.AddHook(lfHook)
@@ -73,9 +79,9 @@ func New(level logrus.Level, writer io.Writer, isConsolePrint bool) {
 
 	logrus.SetLevel(level)
 	logrus.SetFormatter(&Formatter{ //写log日志不需要颜色
-		HideKeys:      true,
+		HideKeys:      false,
 		NoColors:      true,
-		ShowFullLevel: true,
+		ShowFullLevel: false,
 	})
 
 	logrus.SetOutput(writer)
@@ -91,18 +97,18 @@ func (hook *NoConsolePrint) Levels() []logrus.Level {
 	return logrus.AllLevels
 }
 
-func messagePrint(logFunc func(...interface{}), level logrus.Level, format string, a ...interface{}) {
-	formatMessage := fmt.Sprint(a...)
+func output(logFunc func(...interface{}), level logrus.Level, format string, a ...interface{}) {
+	message := fmt.Sprint(a...)
 	if format != "" {
-		formatMessage = fmt.Sprintf(format, a...)
+		message = fmt.Sprintf(format, a...)
 	}
 
-	pc, _, line, _ := runtime.Caller(2)
-	if level <= logrus.WarnLevel { //warn以上级别打印错误位置和行号
-		formatMessage = fmt.Sprintf("<%v#%v> %s",
-			runtime.FuncForPC(pc).Name(), line, formatMessage)
+	pc, _, line, _ := runtime.Caller(2) //放在底层层极过多，拿不到最上层的函数，放到这层正常
+	if level <= logrus.WarnLevel {      //warn以上级别打印错误位置和行号
+		message = fmt.Sprintf("<%v#%v> %s",
+			runtime.FuncForPC(pc).Name(), line, message)
 	}
-	logFunc(formatMessage)
+	logFunc(message)
 }
 
 /*
@@ -112,59 +118,59 @@ logger.Debug(...)
 */
 
 func Debug(a ...interface{}) {
-	messagePrint(logrus.Debug, logrus.DebugLevel, "", a...)
+	output(logrus.Debug, logrus.DebugLevel, "", a...)
 }
 
 func Debugf(format string, a ...interface{}) {
-	messagePrint(logrus.Debug, logrus.DebugLevel, format, a...)
+	output(logrus.Debug, logrus.DebugLevel, format, a...)
 }
 
 func Info(a ...interface{}) {
-	messagePrint(logrus.Info, logrus.InfoLevel, "", a...)
+	output(logrus.Info, logrus.InfoLevel, "", a...)
 }
 
 func Infof(format string, a ...interface{}) {
-	messagePrint(logrus.Info, logrus.InfoLevel, format, a...)
+	output(logrus.Info, logrus.InfoLevel, format, a...)
 }
 
 func Warn(a ...interface{}) {
-	messagePrint(logrus.Warn, logrus.WarnLevel, "", a...)
+	output(logrus.Warn, logrus.WarnLevel, "", a...)
 }
 
 func Warnf(format string, a ...interface{}) {
-	messagePrint(logrus.Warn, logrus.WarnLevel, format, a...)
+	output(logrus.Warn, logrus.WarnLevel, format, a...)
 }
 
 func Error(a ...interface{}) {
-	messagePrint(logrus.Error, logrus.ErrorLevel, "", a...)
+	output(logrus.Error, logrus.ErrorLevel, "", a...)
 }
 
 func Errorf(format string, a ...interface{}) {
-	messagePrint(logrus.Error, logrus.ErrorLevel, format, a...)
+	output(logrus.Error, logrus.ErrorLevel, format, a...)
 }
 
 func Fatal(a ...interface{}) {
-	messagePrint(logrus.Fatal, logrus.FatalLevel, "", a...)
+	output(logrus.Fatal, logrus.FatalLevel, "", a...)
 }
 
 func Fatalf(format string, a ...interface{}) {
-	messagePrint(logrus.Fatal, logrus.FatalLevel, format, a...)
+	output(logrus.Fatal, logrus.FatalLevel, format, a...)
 }
 
 func Panic(a ...interface{}) {
-	messagePrint(logrus.Panic, logrus.PanicLevel, "", a...)
+	output(logrus.Panic, logrus.PanicLevel, "", a...)
 }
 
 func Panicf(format string, a ...interface{}) {
-	messagePrint(logrus.Panic, logrus.PanicLevel, format, a...)
+	output(logrus.Panic, logrus.PanicLevel, format, a...)
 }
 
 func Trace(a ...interface{}) {
-	messagePrint(logrus.Trace, logrus.TraceLevel, "", a...)
+	output(logrus.Trace, logrus.TraceLevel, "", a...)
 }
 
 func Tracef(format string, a ...interface{}) {
-	messagePrint(logrus.Trace, logrus.TraceLevel, format, a...)
+	output(logrus.Trace, logrus.TraceLevel, format, a...)
 }
 
 func WithField(key string, value interface{}) *logrus.Entry {
@@ -180,7 +186,7 @@ type Formatter struct {
 	// FieldsOrder - default: fields sorted alphabetically
 	FieldsOrder []string
 
-	// TimestampFormat - default: time.StampMilli = "Jan _2 15:04:05.000"
+	// TimestampFormat - default: time.StampMilli = "2006-01-02 15:04:05.000"
 	TimestampFormat string
 
 	// HideKeys - show [fieldValue] instead of [fieldKey:fieldValue]
@@ -321,7 +327,6 @@ func (f *Formatter) writeOrderedFields(b *bytes.Buffer, entry *logrus.Entry) {
 		}
 
 		sort.Strings(notFoundFields)
-
 		for _, field := range notFoundFields {
 			f.writeField(b, entry, field)
 		}
@@ -337,22 +342,29 @@ func (f *Formatter) writeField(b *bytes.Buffer, entry *logrus.Entry, field strin
 }
 
 const (
-	colorRed    = 31
-	colorYellow = 33
-	colorBlue   = 36
-	colorGray   = 37
+	red        = 31
+	lightgreen = 32
+	yellow     = 33
+	blue       = 34
+	purple     = 35
+	green      = 36
+	gray       = 37
 )
 
 func getColorByLevel(level logrus.Level) int {
 	switch level {
+	case logrus.InfoLevel:
+		return green
 	case logrus.DebugLevel:
-		return colorGray
+		return blue
 	case logrus.WarnLevel:
-		return colorYellow
-	case logrus.ErrorLevel, logrus.FatalLevel, logrus.PanicLevel:
-		return colorRed
+		return yellow
+	case logrus.ErrorLevel:
+		return red
+	case logrus.FatalLevel, logrus.PanicLevel:
+		return purple
 	default:
-		return colorBlue
+		return gray
 	}
 }
 

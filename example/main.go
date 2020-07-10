@@ -4,12 +4,14 @@ import (
 	"time"
 
 	"github.com/mzky/utils/logger"
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
 	//级别可设置：debug|info|warn|error
 	//logPath可设置相对路径也可设置绝对路径
-	//isConsolePrint true时即写log文件也在控制台打印,并且控制台提供颜色输出
+
+	custom()
 	size()
 	date()
 	//test()
@@ -20,11 +22,26 @@ func main() {
 	logger.Fatalf("%sf", "fatal") //上一条已退出 本条不能执行
 }
 
+func custom() {
+	logPath := "./customSplit.log"
+	writer := logger.SizeWriter(logPath, 100, 730)
+	logger.NewCustom(func() {
+		logrus.SetLevel(logger.GetLevel("debug"))
+		logrus.SetFormatter(&logger.Formatter{ //写log日志不需要颜色
+			HideKeys:      true,
+			NoColors:      true,
+			ShowFullLevel: false,
+		})
+		logrus.SetOutput(writer)
+	})
+	printLog()
+}
+
 func size() {
 	//文件大小分割，建议使用此方法，归档压缩率高，节省空间
 	logPath := "./sizeSplit.log"
 	writer := logger.SizeWriter(logPath, 100, 730)
-	logger.New(logger.GetLevel("debug"), writer, false)
+	logger.New(logger.GetLevel("debug"), writer, true)
 	printLog()
 }
 
@@ -33,7 +50,7 @@ func date() {
 	logPath := "./dateSplit.log"
 	//文件名只能精确到小时，分秒为0000，此问题待解
 	writer, _ := logger.DateWriter(logPath, 1, 1)
-	logger.New(logger.GetLevel("debug"), writer, false)
+	logger.New(logger.GetLevel("debug"), writer, true)
 	printLog()
 }
 
