@@ -44,7 +44,7 @@ splitTime:      日志切割时间,单位:小时
 */
 func DateWriter(logPath string, maxRetainDay, splitTime time.Duration) (*rotatelogs.RotateLogs, error) {
 	return rotatelogs.New(
-		strings.Join([]string{logPath, "%Y%m%d%H%M%S"}, "."),
+		logPath+".%Y%m%d%H",
 		rotatelogs.WithLinkName(logPath),                 // 生成软链，指向最新日志文件
 		rotatelogs.WithMaxAge(24*maxRetainDay*time.Hour), // 文件最大保存时间
 		rotatelogs.WithRotationTime(splitTime*time.Hour), // 日志切割时间

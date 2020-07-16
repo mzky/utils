@@ -48,7 +48,7 @@ func size() {
 func date() {
 	//时间分割方式，两种方式同时仅生效最后一个设置
 	logPath := "./dateSplit.log"
-	//文件名只能精确到小时，分秒为0000，此问题待解
+	//文件名只能精确到小时，此问题为第三方组件限制
 	writer, _ := logger.DateWriter(logPath, 1, 1)
 	logger.New(logger.GetLevel("debug"), writer, true)
 	printLog()
