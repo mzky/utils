@@ -1,3 +1,8 @@
+# 此项目废弃
+
+使用重构后的日志模块： https://github.com/bingoohuang/golog
+
+
 # utils
 
 一个工具集，包括文件组件，日志组件
