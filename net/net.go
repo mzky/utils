@@ -4,7 +4,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"log"
 	"net"
 	"regexp"
 	"strconv"
@@ -16,56 +15,39 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type Network struct {
-	Name       string
-	IP         string
-	MACAddress string
-}
-
-type intfInfo struct {
+type ItfNet struct {
 	Name       string
 	MacAddress string
-	Ipv4       []string
+	IP         []string
 }
 
-func getNetworkInfo() error {
-	intf, err := net.Interfaces()
+func GetNetworkInfo() ([]ItfNet, error) {
+	var netArray []ItfNet
+	ifNet, err := net.Interfaces()
 	if err != nil {
-		log.Fatal("get network info failed: %v", err)
-		return err
+		return netArray, err
 	}
-	var is = make([]intfInfo, len(intf))
-	for i, v := range intf {
-		ips, err := v.Addrs()
+
+	for _, v := range ifNet {
+		address, err := v.Addrs()
 		if err != nil {
-			log.Fatal("get network addr failed: %v", err)
-			return err
+			return netArray, err
 		}
 
+		var iftNet ItfNet
 		//此处过滤loopback（本地回环）和isatap（isatap隧道）
 		if !strings.Contains(v.Name, "lo") && !strings.Contains(v.Name, "br") {
-			var network Network
-			is[i].Name = v.Name
-			is[i].MacAddress = v.HardwareAddr.String()
-			for _, ip := range ips {
-				if strings.Contains(ip.String(), ".") {
-					is[i].Ipv4 = append(is[i].Ipv4, ip.String())
-				}
+			iftNet.Name = v.Name
+			iftNet.MacAddress = v.HardwareAddr.String()
+			for _, addr := range address {
+				ipNet := addr.(*net.IPNet)
+				iftNet.IP = append(iftNet.IP, ipNet.IP.String())
 			}
-			network.Name = is[i].Name
-			network.MACAddress = is[i].MacAddress
-			if len(is[i].Ipv4) > 0 {
-				network.IP = is[i].Ipv4[0]
-			}
-
-			fmt.Println(network.Name, network.MACAddress, network.IP)
-		} else {
-			fmt.Println("======", v.Name)
+			netArray = append(netArray, iftNet)
 		}
-
 	}
 
-	return nil
+	return netArray, nil
 }
 
 // If we use bond or team technology
@@ -73,13 +55,13 @@ func getNetworkInfo() error {
 // use net.Interface.HardwareAddr will get the same mac address
 // The following code thinking was borrowed from ethtool's source code ethtool.c
 // this code will get the permanent mac address
-func getPermanentMacAddr() error {
-	var err error
+func GetRealAdapter() ([]ItfNet, error) {
+	var netArray []ItfNet
 	fd, err := syscall.Socket(syscall.AF_INET, syscall.SOCK_DGRAM, 0)
 	if err != nil {
 		fd, err = syscall.Socket(syscall.AF_NETLINK, syscall.SOCK_RAW, syscall.NETLINK_GENERIC)
 		if err != nil {
-			return err
+			return netArray, err
 		}
 	}
 
@@ -111,7 +93,7 @@ func getPermanentMacAddr() error {
 			uintptr(fd), uintptr(0x8946), uintptr(unsafe.Pointer(&ifr)))
 
 		if sysErr != 0 {
-			fmt.Println("调用ioctl获取网口", adapter.Name, "物理MAC地址错误")
+			logrus.Error("调用ioctl获取网口", adapter.Name, "物理MAC地址错误")
 			// return errors.New("call ioctl get permanent mac address error")
 			continue
 		}
@@ -138,11 +120,18 @@ func getPermanentMacAddr() error {
 		for i := 10; i > 0; i = i - 2 {
 			mac = fmt.Sprintf("%s:%s", mac[:i], mac[i:])
 		}
-
-		fmt.Println(mac)
+		var iftNet ItfNet
+		iftNet.Name = adapter.Name
+		iftNet.MacAddress = mac
+		address, _ := adapter.Addrs()
+		for _, addr := range address {
+			ipNet := addr.(*net.IPNet)
+			iftNet.IP = append(iftNet.IP, ipNet.IP.String())
+		}
+		netArray = append(netArray, iftNet)
 	}
 
-	return nil
+	return netArray, nil
 }
 
 func IsIP(host string) bool {

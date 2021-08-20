@@ -112,9 +112,20 @@ func FileSize(fp string) (int64, error) {
 }
 
 // FileIsExist 判断文件夹或文件是否存在, true为存在
-func FileIsExist(fp string) bool {
-	_, err := os.Stat(fp)
+func FileIsExist(filename string) bool {
+	_, err := os.Stat(filename)
 	return err == nil || os.IsExist(err)
+}
+
+// FileExistNotDir FileExists 检查文件是否存在，并且不是目录
+func FileExistNotDir(filename string) error {
+	if fi, err := os.Stat(filename); err != nil {
+		return err
+	} else if fi.IsDir() {
+		return fmt.Errorf("file %s is a directory", filename)
+	}
+
+	return nil
 }
 
 // PathInfo 获取目录,文件名,后缀
@@ -197,17 +208,6 @@ func PathFileExists(path string) (bool, error) {
 		return false, nil
 	}
 	return false, err
-}
-
-// FileExists 检查文件是否存在，并且不是目录
-func FileExists(filename string) error {
-	if fi, err := os.Stat(filename); err != nil {
-		return err
-	} else if fi.IsDir() {
-		return fmt.Errorf("file %s is a directory", filename)
-	}
-
-	return nil
 }
 
 func WriteFile(filePathName, content string) error {
