@@ -10,4 +10,4 @@
 
 定时操作
 
-使用重构后的日志模块： https://github.com/bingoohuang/golog
+日志模块： https://github.com/bingoohuang/golog
