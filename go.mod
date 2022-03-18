@@ -1,4 +1,4 @@
-module utils
+module github.com/mzky/utils
 
 go 1.16
 
