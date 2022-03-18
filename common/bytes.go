@@ -5,7 +5,7 @@ import (
 	"crypto/rand"
 )
 
-// 将int写入指定长度的[]byte
+// Int2Byte 将int写入指定长度的[]byte
 func Int2Byte(data, len int) (ret []byte) {
 	ret = make([]byte, len)
 	var tmp int = 0xff
@@ -16,7 +16,7 @@ func Int2Byte(data, len int) (ret []byte) {
 	return ret
 }
 
-// 从[]byte中读取长度
+// Byte2Int 从[]byte中读取长度
 func Byte2Int(data []byte) int {
 	var ret int = 0
 	var len int = len(data)
@@ -27,7 +27,7 @@ func Byte2Int(data []byte) int {
 	return ret
 }
 
-// 合并[]byte
+// BytesMerger 合并[]byte
 func BytesMerger(b1, b2 []byte) []byte {
 	var buffer bytes.Buffer
 	buffer.Write(b1)
@@ -36,7 +36,7 @@ func BytesMerger(b1, b2 []byte) []byte {
 	return buffer.Bytes()
 }
 
-// 随机制定长度[]byte，主要用于产生对称key
+// Random 随机制定长度[]byte，主要用于产生对称key
 func Random(n uint) []byte {
 	key := make([]byte, n)
 	rand.Read(key)

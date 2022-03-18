@@ -17,3 +17,12 @@ func StartTimer(f func(), cycle time.Duration, hour int) {
 		}
 	}()
 }
+
+// TimeFormat 格式化时间，参数为空时，默认格式化为 200601021504
+func TimeFormat(layout ...string) string {
+	t := time.Now()
+	if len(layout) > 0 {
+		return t.Format(layout[0])
+	}
+	return t.Format("200601021504")
+}
