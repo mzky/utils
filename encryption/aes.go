@@ -15,8 +15,8 @@ func EncryptAES(src, key []byte) ([]byte, error) {
 	if src == nil {
 		return nil, errors.New("plain content empty")
 	}
-	content := []byte(src)
-	content = PKCS5Padding(content, block.BlockSize())
+
+	content := PKCS5Padding(src, block.BlockSize())
 	encrypted := make([]byte, len(content))
 	NewECBEncrypter(block).CryptBlocks(encrypted, content)
 
