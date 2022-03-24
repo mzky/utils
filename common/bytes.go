@@ -5,7 +5,7 @@ import (
 	"crypto/rand"
 )
 
-// Int2Byte 将int写入指定长度的[]byte
+// Int2Byte 将int写入指定长度的[]byte(小端)
 func Int2Byte(data, len int) (ret []byte) {
 	ret = make([]byte, len)
 	var tmp int = 0xff
@@ -16,7 +16,7 @@ func Int2Byte(data, len int) (ret []byte) {
 	return ret
 }
 
-// Byte2Int 从[]byte中读取长度
+// Byte2Int 从[]byte中读取长度(小端)
 func Byte2Int(data []byte) int {
 	var ret int = 0
 	var len int = len(data)
