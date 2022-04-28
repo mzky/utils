@@ -21,7 +21,7 @@ import (
 	_ "github.com/mzky/utils/crypto/sha256"
 	_ "github.com/mzky/utils/crypto/sha512"
 	"github.com/mzky/utils/crypto/x509/pkix"
-	"internal/testenv"
+	"github.com/mzky/utils/internal/testenv"
 	"io"
 	"math/big"
 	"net"

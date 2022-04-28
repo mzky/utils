@@ -7,7 +7,7 @@
 
 package sha512
 
-import "internal/cpu"
+import "github.com/mzky/utils/internal/cpu"
 
 //go:noescape
 func blockAVX2(dig *digest, p []byte)

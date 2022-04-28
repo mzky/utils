@@ -12,7 +12,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/mzky/utils/crypto/x509"
-	"internal/testenv"
+	"github.com/mzky/utils/internal/testenv"
 	"io"
 	"math"
 	"net"

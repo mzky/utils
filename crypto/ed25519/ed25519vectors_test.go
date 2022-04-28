@@ -8,7 +8,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"github.com/mzky/utils/crypto/ed25519"
-	"internal/testenv"
+	"github.com/mzky/utils/internal/testenv"
 	"os"
 	"os/exec"
 	"path/filepath"

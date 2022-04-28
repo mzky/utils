@@ -8,7 +8,7 @@
 package rand
 
 import (
-	"internal/syscall/unix"
+	"github.com/mzky/utils/internal/syscall/unix"
 )
 
 // maxGetRandomRead is platform dependent.

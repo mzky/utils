@@ -12,7 +12,7 @@ package macOS
 
 import (
 	"errors"
-	"internal/abi"
+	"github.com/mzky/utils/internal/abi"
 	"reflect"
 	"runtime"
 	"unsafe"

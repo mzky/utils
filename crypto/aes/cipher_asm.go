@@ -10,7 +10,7 @@ package aes
 import (
 	"github.com/mzky/utils/crypto/cipher"
 	"github.com/mzky/utils/crypto/internal/subtle"
-	"internal/cpu"
+	"github.com/mzky/utils/internal/cpu"
 )
 
 // defined in asm_*.s

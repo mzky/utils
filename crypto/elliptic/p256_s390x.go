@@ -9,7 +9,7 @@ package elliptic
 
 import (
 	"github.com/mzky/utils/crypto/subtle"
-	"internal/cpu"
+	"github.com/mzky/utils/internal/cpu"
 	"math/big"
 	"unsafe"
 )

@@ -7,7 +7,7 @@ package ecdsa
 import (
 	"github.com/mzky/utils/crypto/cipher"
 	"github.com/mzky/utils/crypto/elliptic"
-	"internal/cpu"
+	"github.com/mzky/utils/internal/cpu"
 	"math/big"
 )
 

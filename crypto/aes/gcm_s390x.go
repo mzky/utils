@@ -10,7 +10,7 @@ import (
 	"github.com/mzky/utils/crypto/cipher"
 	subtleoverlap "github.com/mzky/utils/crypto/internal/subtle"
 	"github.com/mzky/utils/crypto/subtle"
-	"internal/cpu"
+	"github.com/mzky/utils/internal/cpu"
 )
 
 // This file contains two implementations of AES-GCM. The first implementation

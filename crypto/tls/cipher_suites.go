@@ -14,8 +14,8 @@ import (
 	"github.com/mzky/utils/crypto/rc4"
 	"github.com/mzky/utils/crypto/sha1"
 	"github.com/mzky/utils/crypto/sha256"
+	"github.com/mzky/utils/internal/cpu"
 	"hash"
-	"internal/cpu"
 	"runtime"
 
 	"golang.org/x/crypto/chacha20poly1305"
