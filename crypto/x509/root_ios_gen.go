@@ -20,9 +20,6 @@ import (
 	"archive/tar"
 	"bytes"
 	"compress/gzip"
-	"crypto/sha256"
-	"crypto/tls"
-	"crypto/x509"
 	"encoding/pem"
 	"flag"
 	"fmt"
@@ -35,6 +32,9 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"utils/crypto/sha256"
+	"utils/crypto/tls"
+	"utils/crypto/x509"
 )
 
 func main() {

@@ -9,9 +9,9 @@
 package sha1_test
 
 import (
-	"crypto/sha1"
 	"syscall"
 	"testing"
+	"utils/crypto/sha1"
 )
 
 func TestOutOfBoundsRead(t *testing.T) {

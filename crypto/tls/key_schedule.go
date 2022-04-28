@@ -5,12 +5,12 @@
 package tls
 
 import (
-	"crypto/elliptic"
-	"crypto/hmac"
 	"errors"
 	"hash"
 	"io"
 	"math/big"
+	"utils/crypto/elliptic"
+	"utils/crypto/hmac"
 
 	"golang.org/x/crypto/cryptobyte"
 	"golang.org/x/crypto/curve25519"

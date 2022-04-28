@@ -6,17 +6,17 @@ package tls
 
 import (
 	"crypto"
-	"crypto/aes"
-	"crypto/cipher"
-	"crypto/des"
-	"crypto/hmac"
-	"crypto/rc4"
-	"crypto/sha1"
-	"crypto/sha256"
 	"fmt"
 	"hash"
 	"internal/cpu"
 	"runtime"
+	"utils/crypto/aes"
+	"utils/crypto/cipher"
+	"utils/crypto/des"
+	"utils/crypto/hmac"
+	"utils/crypto/rc4"
+	"utils/crypto/sha1"
+	"utils/crypto/sha256"
 
 	"golang.org/x/crypto/chacha20poly1305"
 )

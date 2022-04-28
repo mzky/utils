@@ -5,8 +5,8 @@
 package aes
 
 import (
-	"crypto/cipher"
 	"testing"
+	"utils/crypto/cipher"
 )
 
 // Check that the optimized implementations of cipher modes will

@@ -8,11 +8,6 @@ import (
 	"bytes"
 	"context"
 	"crypto"
-	"crypto/ecdsa"
-	"crypto/ed25519"
-	"crypto/rsa"
-	"crypto/subtle"
-	"crypto/x509"
 	"errors"
 	"fmt"
 	"hash"
@@ -21,6 +16,11 @@ import (
 	"strings"
 	"sync/atomic"
 	"time"
+	"utils/crypto/ecdsa"
+	"utils/crypto/ed25519"
+	"utils/crypto/rsa"
+	"utils/crypto/subtle"
+	"utils/crypto/x509"
 )
 
 type clientHandshakeState struct {

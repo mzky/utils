@@ -5,8 +5,8 @@
 package elliptic
 
 import (
-	"crypto/elliptic/internal/fiat"
 	"math/big"
+	"utils/crypto/elliptic/internal/fiat"
 )
 
 type p521Curve struct {

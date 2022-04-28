@@ -6,11 +6,11 @@ package cipher_test
 
 import (
 	"bytes"
-	"crypto/cipher"
-	"crypto/rand"
 	"fmt"
 	"io"
 	"testing"
+	"utils/crypto/cipher"
+	"utils/crypto/rand"
 )
 
 func TestXOR(t *testing.T) {

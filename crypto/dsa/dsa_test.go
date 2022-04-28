@@ -5,9 +5,9 @@
 package dsa
 
 import (
-	"crypto/rand"
 	"math/big"
 	"testing"
+	"utils/crypto/rand"
 )
 
 func testSignAndVerify(t *testing.T, i int, priv *PrivateKey) {

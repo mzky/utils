@@ -6,13 +6,13 @@ package tls
 
 import (
 	"bytes"
-	"crypto/aes"
-	"crypto/cipher"
-	"crypto/hmac"
-	"crypto/sha256"
-	"crypto/subtle"
 	"errors"
 	"io"
+	"utils/crypto/aes"
+	"utils/crypto/cipher"
+	"utils/crypto/hmac"
+	"utils/crypto/sha256"
+	"utils/crypto/subtle"
 
 	"golang.org/x/crypto/cryptobyte"
 )

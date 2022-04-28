@@ -7,14 +7,14 @@ package tls
 import (
 	"bytes"
 	"crypto"
-	"crypto/ecdsa"
-	"crypto/ed25519"
-	"crypto/elliptic"
-	"crypto/rsa"
 	"errors"
 	"fmt"
 	"hash"
 	"io"
+	"utils/crypto/ecdsa"
+	"utils/crypto/ed25519"
+	"utils/crypto/elliptic"
+	"utils/crypto/rsa"
 )
 
 // verifyHandshakeSignature verifies a signature against pre-hashed

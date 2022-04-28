@@ -8,9 +8,9 @@
 package ecdsa
 
 import (
-	"crypto/cipher"
-	"crypto/elliptic"
 	"math/big"
+	"utils/crypto/cipher"
+	"utils/crypto/elliptic"
 )
 
 func sign(priv *PrivateKey, csprng *cipher.StreamReader, c elliptic.Curve, hash []byte) (r, s *big.Int, err error) {

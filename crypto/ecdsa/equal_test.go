@@ -6,11 +6,11 @@ package ecdsa_test
 
 import (
 	"crypto"
-	"crypto/ecdsa"
-	"crypto/elliptic"
-	"crypto/rand"
-	"crypto/x509"
 	"testing"
+	"utils/crypto/ecdsa"
+	"utils/crypto/elliptic"
+	"utils/crypto/rand"
+	"utils/crypto/x509"
 )
 
 func testEqual(t *testing.T, c elliptic.Curve) {

@@ -6,17 +6,12 @@ package main
 
 import (
 	"fmt"
-
-	. "github.com/mmcloughlin/avo/build"
-	. "github.com/mmcloughlin/avo/gotypes"
-	. "github.com/mmcloughlin/avo/operand"
-	. "github.com/mmcloughlin/avo/reg"
 )
 
 //go:generate go run . -out ../fe_amd64.s -stubs ../fe_amd64.go -pkg field
 
 func main() {
-	Package("crypto/ed25519/internal/edwards25519/field")
+	Package("utils/crypto/ed25519/internal/edwards25519/field")
 	ConstraintExpr("amd64,gc,!purego")
 	feMul()
 	feSquare()

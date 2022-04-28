@@ -9,15 +9,15 @@ package x509
 // implementation.
 
 import (
-	"crypto/aes"
-	"crypto/cipher"
-	"crypto/des"
-	"crypto/md5"
 	"encoding/hex"
 	"encoding/pem"
 	"errors"
 	"io"
 	"strings"
+	"utils/crypto/aes"
+	"utils/crypto/cipher"
+	"utils/crypto/des"
+	"utils/crypto/md5"
 )
 
 type PEMCipher int

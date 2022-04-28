@@ -6,13 +6,13 @@ package tls
 
 import (
 	"crypto"
-	"crypto/md5"
-	"crypto/rsa"
-	"crypto/sha1"
-	"crypto/x509"
 	"errors"
 	"fmt"
 	"io"
+	"utils/crypto/md5"
+	"utils/crypto/rsa"
+	"utils/crypto/sha1"
+	"utils/crypto/x509"
 )
 
 // a keyAgreement implements the client and server side of a TLS key agreement

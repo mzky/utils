@@ -6,14 +6,14 @@ package x509
 
 import (
 	"bytes"
-	"crypto/ecdsa"
-	"crypto/ed25519"
-	"crypto/elliptic"
-	"crypto/rsa"
 	"encoding/hex"
 	"reflect"
 	"strings"
 	"testing"
+	"utils/crypto/ecdsa"
+	"utils/crypto/ed25519"
+	"utils/crypto/elliptic"
+	"utils/crypto/rsa"
 )
 
 // Generated using:

@@ -5,11 +5,11 @@
 package md5_test
 
 import (
-	"crypto/md5"
 	"fmt"
 	"io"
 	"log"
 	"os"
+	"utils/crypto/md5"
 )
 
 func ExampleNew() {

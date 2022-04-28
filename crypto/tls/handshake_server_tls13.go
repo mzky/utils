@@ -8,13 +8,13 @@ import (
 	"bytes"
 	"context"
 	"crypto"
-	"crypto/hmac"
-	"crypto/rsa"
 	"errors"
 	"hash"
 	"io"
 	"sync/atomic"
 	"time"
+	"utils/crypto/hmac"
+	"utils/crypto/rsa"
 )
 
 // maxClientPSKIdentities is the number of client PSK identities the server will

@@ -5,13 +5,13 @@
 package hmac
 
 import (
-	"crypto/md5"
-	"crypto/sha1"
-	"crypto/sha256"
-	"crypto/sha512"
 	"fmt"
 	"hash"
 	"testing"
+	"utils/crypto/md5"
+	"utils/crypto/sha1"
+	"utils/crypto/sha256"
+	"utils/crypto/sha512"
 )
 
 type hmacTest struct {

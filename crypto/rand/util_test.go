@@ -6,13 +6,13 @@ package rand_test
 
 import (
 	"bytes"
-	"crypto/rand"
 	"fmt"
 	"io"
 	"math/big"
 	mathrand "math/rand"
 	"testing"
 	"time"
+	"utils/crypto/rand"
 )
 
 // https://golang.org/issue/6849.

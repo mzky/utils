@@ -7,15 +7,6 @@ package x509
 import (
 	"bytes"
 	"crypto"
-	"crypto/dsa"
-	"crypto/ecdsa"
-	"crypto/ed25519"
-	"crypto/elliptic"
-	"crypto/rand"
-	"crypto/rsa"
-	_ "crypto/sha256"
-	_ "crypto/sha512"
-	"crypto/x509/pkix"
 	"encoding/asn1"
 	"encoding/base64"
 	"encoding/hex"
@@ -32,6 +23,15 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"utils/crypto/dsa"
+	"utils/crypto/ecdsa"
+	"utils/crypto/ed25519"
+	"utils/crypto/elliptic"
+	"utils/crypto/rand"
+	"utils/crypto/rsa"
+	_ "utils/crypto/sha256"
+	_ "utils/crypto/sha512"
+	"utils/crypto/x509/pkix"
 )
 
 func TestParsePKCS1PrivateKey(t *testing.T) {

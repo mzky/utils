@@ -11,13 +11,13 @@
 package main
 
 import (
-	"crypto/rand"
-	"crypto/x509"
-	"crypto/x509/pkix"
 	"encoding/pem"
 	"math/big"
 	"strings"
 	"time"
+	"utils/crypto/rand"
+	"utils/crypto/x509"
+	"utils/crypto/x509/pkix"
 )
 
 func main() {

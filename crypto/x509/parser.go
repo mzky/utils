@@ -5,12 +5,6 @@ package x509
 
 import (
 	"bytes"
-	"crypto/dsa"
-	"crypto/ecdsa"
-	"crypto/ed25519"
-	"crypto/elliptic"
-	"crypto/rsa"
-	"crypto/x509/pkix"
 	"encoding/asn1"
 	"errors"
 	"fmt"
@@ -22,6 +16,12 @@ import (
 	"time"
 	"unicode/utf16"
 	"unicode/utf8"
+	"utils/crypto/dsa"
+	"utils/crypto/ecdsa"
+	"utils/crypto/ed25519"
+	"utils/crypto/elliptic"
+	"utils/crypto/rsa"
+	"utils/crypto/x509/pkix"
 
 	"golang.org/x/crypto/cryptobyte"
 	cryptobyte_asn1 "golang.org/x/crypto/cryptobyte/asn1"

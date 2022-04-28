@@ -6,14 +6,14 @@ package tls
 
 import (
 	"crypto"
-	"crypto/hmac"
-	"crypto/md5"
-	"crypto/sha1"
-	"crypto/sha256"
-	"crypto/sha512"
 	"errors"
 	"fmt"
 	"hash"
+	"utils/crypto/hmac"
+	"utils/crypto/md5"
+	"utils/crypto/sha1"
+	"utils/crypto/sha256"
+	"utils/crypto/sha512"
 )
 
 // Split a premaster secret in two as specified in RFC 4346, Section 5.
@@ -247,7 +247,7 @@ func (h *finishedHash) discardHandshakeBuffer() {
 // ConnectionState.ekm when renegotiation is enabled and thus
 // we wish to fail all key-material export requests.
 func noExportedKeyingMaterial(label string, context []byte, length int) ([]byte, error) {
-	return nil, errors.New("crypto/tls: ExportKeyingMaterial is unavailable when renegotiation is enabled")
+	return nil, errors.New("utils/crypto/tls: ExportKeyingMaterial is unavailable when renegotiation is enabled")
 }
 
 // ekmFromMasterSecret generates exported keying material as defined in RFC 5705.
@@ -256,7 +256,7 @@ func ekmFromMasterSecret(version uint16, suite *cipherSuite, masterSecret, clien
 		switch label {
 		case "client finished", "server finished", "master secret", "key expansion":
 			// These values are reserved and may not be used.
-			return nil, fmt.Errorf("crypto/tls: reserved ExportKeyingMaterial label: %s", label)
+			return nil, fmt.Errorf("utils/crypto/tls: reserved ExportKeyingMaterial label: %s", label)
 		}
 
 		seedLen := len(serverRandom) + len(clientRandom)
@@ -270,7 +270,7 @@ func ekmFromMasterSecret(version uint16, suite *cipherSuite, masterSecret, clien
 
 		if context != nil {
 			if len(context) >= 1<<16 {
-				return nil, fmt.Errorf("crypto/tls: ExportKeyingMaterial context too long")
+				return nil, fmt.Errorf("utils/crypto/tls: ExportKeyingMaterial context too long")
 			}
 			seed = append(seed, byte(len(context)>>8), byte(len(context)))
 			seed = append(seed, context...)

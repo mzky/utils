@@ -5,11 +5,11 @@
 package sha1_test
 
 import (
-	"crypto/sha1"
 	"fmt"
 	"io"
 	"log"
 	"os"
+	"utils/crypto/sha1"
 )
 
 func ExampleNew() {

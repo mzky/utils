@@ -8,12 +8,12 @@ package sha1
 
 import (
 	"bytes"
-	"crypto/rand"
 	"encoding"
 	"fmt"
 	"hash"
 	"io"
 	"testing"
+	"utils/crypto/rand"
 )
 
 type sha1Test struct {

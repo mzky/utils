@@ -324,12 +324,12 @@ func TestShortBlocks(t *testing.T) {
 
 	c, _ := NewCipher(bytes(16))
 
-	mustPanic(t, "crypto/aes: input not full block", func() { c.Encrypt(bytes(1), bytes(1)) })
-	mustPanic(t, "crypto/aes: input not full block", func() { c.Decrypt(bytes(1), bytes(1)) })
-	mustPanic(t, "crypto/aes: input not full block", func() { c.Encrypt(bytes(100), bytes(1)) })
-	mustPanic(t, "crypto/aes: input not full block", func() { c.Decrypt(bytes(100), bytes(1)) })
-	mustPanic(t, "crypto/aes: output not full block", func() { c.Encrypt(bytes(1), bytes(100)) })
-	mustPanic(t, "crypto/aes: output not full block", func() { c.Decrypt(bytes(1), bytes(100)) })
+	mustPanic(t, "utils/crypto/aes: input not full block", func() { c.Encrypt(bytes(1), bytes(1)) })
+	mustPanic(t, "utils/crypto/aes: input not full block", func() { c.Decrypt(bytes(1), bytes(1)) })
+	mustPanic(t, "utils/crypto/aes: input not full block", func() { c.Encrypt(bytes(100), bytes(1)) })
+	mustPanic(t, "utils/crypto/aes: input not full block", func() { c.Decrypt(bytes(100), bytes(1)) })
+	mustPanic(t, "utils/crypto/aes: output not full block", func() { c.Encrypt(bytes(1), bytes(100)) })
+	mustPanic(t, "utils/crypto/aes: output not full block", func() { c.Decrypt(bytes(1), bytes(100)) })
 }
 
 func mustPanic(t *testing.T, msg string, f func()) {

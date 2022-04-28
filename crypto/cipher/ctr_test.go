@@ -6,8 +6,8 @@ package cipher_test
 
 import (
 	"bytes"
-	"crypto/cipher"
 	"testing"
+	"utils/crypto/cipher"
 )
 
 type noopBlock int

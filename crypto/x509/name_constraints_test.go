@@ -6,10 +6,6 @@ package x509
 
 import (
 	"bytes"
-	"crypto/ecdsa"
-	"crypto/elliptic"
-	"crypto/rand"
-	"crypto/x509/pkix"
 	"encoding/asn1"
 	"encoding/hex"
 	"encoding/pem"
@@ -24,6 +20,10 @@ import (
 	"sync"
 	"testing"
 	"time"
+	"utils/crypto/ecdsa"
+	"utils/crypto/elliptic"
+	"utils/crypto/rand"
+	"utils/crypto/x509/pkix"
 )
 
 const (

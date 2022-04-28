@@ -5,13 +5,13 @@
 package x509_test
 
 import (
-	"crypto/dsa"
-	"crypto/ecdsa"
-	"crypto/ed25519"
-	"crypto/rsa"
-	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"utils/crypto/dsa"
+	"utils/crypto/ecdsa"
+	"utils/crypto/ed25519"
+	"utils/crypto/rsa"
+	"utils/crypto/x509"
 )
 
 func ExampleCertificate_Verify() {

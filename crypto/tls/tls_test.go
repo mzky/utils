@@ -8,7 +8,6 @@ import (
 	"bytes"
 	"context"
 	"crypto"
-	"crypto/x509"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -22,6 +21,7 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"utils/crypto/x509"
 )
 
 var rsaCertPEM = `-----BEGIN CERTIFICATE-----

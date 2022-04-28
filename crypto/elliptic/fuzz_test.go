@@ -8,9 +8,9 @@
 package elliptic
 
 import (
-	"crypto/rand"
 	"testing"
 	"time"
+	"utils/crypto/rand"
 )
 
 func TestFuzz(t *testing.T) {

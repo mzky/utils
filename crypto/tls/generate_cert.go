@@ -11,13 +11,6 @@
 package main
 
 import (
-	"crypto/ecdsa"
-	"crypto/ed25519"
-	"crypto/elliptic"
-	"crypto/rand"
-	"crypto/rsa"
-	"crypto/x509"
-	"crypto/x509/pkix"
 	"encoding/pem"
 	"flag"
 	"log"
@@ -26,6 +19,13 @@ import (
 	"os"
 	"strings"
 	"time"
+	"utils/crypto/ecdsa"
+	"utils/crypto/ed25519"
+	"utils/crypto/elliptic"
+	"utils/crypto/rand"
+	"utils/crypto/rsa"
+	"utils/crypto/x509"
+	"utils/crypto/x509/pkix"
 )
 
 var (

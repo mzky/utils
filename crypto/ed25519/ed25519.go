@@ -15,12 +15,12 @@ package ed25519
 import (
 	"bytes"
 	"crypto"
-	"crypto/ed25519/internal/edwards25519"
-	cryptorand "crypto/rand"
-	"crypto/sha512"
 	"errors"
 	"io"
 	"strconv"
+	"utils/crypto/ed25519/internal/edwards25519"
+	cryptorand "utils/crypto/rand"
+	"utils/crypto/sha512"
 )
 
 const (

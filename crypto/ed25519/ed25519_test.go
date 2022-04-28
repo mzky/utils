@@ -9,11 +9,11 @@ import (
 	"bytes"
 	"compress/gzip"
 	"crypto"
-	"crypto/rand"
 	"encoding/hex"
 	"os"
 	"strings"
 	"testing"
+	"utils/crypto/rand"
 )
 
 type zeroReader struct{}

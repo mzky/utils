@@ -5,10 +5,10 @@
 package ecdsa
 
 import (
-	"crypto/cipher"
-	"crypto/elliptic"
 	"internal/cpu"
 	"math/big"
+	"utils/crypto/cipher"
+	"utils/crypto/elliptic"
 )
 
 // kdsa invokes the "compute digital signature authentication"

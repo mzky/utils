@@ -9,10 +9,10 @@ package x509
 
 import (
 	"bytes"
-	macOS "crypto/x509/internal/macos"
 	"fmt"
 	"os"
 	"strings"
+	macOS "utils/crypto/x509/internal/macos"
 )
 
 var debugDarwinRoots = strings.Contains(os.Getenv("GODEBUG"), "x509roots=1")
@@ -46,7 +46,7 @@ func loadSystemRoots() (*CertPool, error) {
 			cert, err := exportCertificate(c)
 			if err != nil {
 				if debugDarwinRoots {
-					fmt.Fprintf(os.Stderr, "crypto/x509: domain %d, certificate #%d: %v\n", domain, i, err)
+					fmt.Fprintf(os.Stderr, "utils/crypto/x509: domain %d, certificate #%d: %v\n", domain, i, err)
 				}
 				continue
 			}
@@ -61,12 +61,12 @@ func loadSystemRoots() (*CertPool, error) {
 				result, err = sslTrustSettingsResult(c)
 				if err != nil {
 					if debugDarwinRoots {
-						fmt.Fprintf(os.Stderr, "crypto/x509: trust settings for %v: %v\n", cert.Subject, err)
+						fmt.Fprintf(os.Stderr, "utils/crypto/x509: trust settings for %v: %v\n", cert.Subject, err)
 					}
 					continue
 				}
 				if debugDarwinRoots {
-					fmt.Fprintf(os.Stderr, "crypto/x509: trust settings for %v: %d\n", cert.Subject, result)
+					fmt.Fprintf(os.Stderr, "utils/crypto/x509: trust settings for %v: %d\n", cert.Subject, result)
 				}
 			}
 
@@ -98,7 +98,7 @@ func loadSystemRoots() (*CertPool, error) {
 
 			default:
 				if debugDarwinRoots {
-					fmt.Fprintf(os.Stderr, "crypto/x509: unknown trust setting for %v: %d\n", cert.Subject, result)
+					fmt.Fprintf(os.Stderr, "utils/crypto/x509: unknown trust setting for %v: %d\n", cert.Subject, result)
 				}
 			}
 		}
@@ -152,7 +152,7 @@ func sslTrustSettingsResult(cert macOS.CFRef) (macOS.SecTrustSettingsResult, err
 	trustSettings, err := macOS.SecTrustSettingsCopyTrustSettings(cert, macOS.SecTrustSettingsDomainUser)
 	if err != nil || trustSettings == 0 {
 		if debugDarwinRoots && err != macOS.ErrNoTrustSettings {
-			fmt.Fprintf(os.Stderr, "crypto/x509: SecTrustSettingsCopyTrustSettings for SecTrustSettingsDomainUser failed: %s\n", err)
+			fmt.Fprintf(os.Stderr, "utils/crypto/x509: SecTrustSettingsCopyTrustSettings for SecTrustSettingsDomainUser failed: %s\n", err)
 		}
 		trustSettings, err = macOS.SecTrustSettingsCopyTrustSettings(cert, macOS.SecTrustSettingsDomainAdmin)
 	}
@@ -169,7 +169,7 @@ func sslTrustSettingsResult(cert macOS.CFRef) (macOS.SecTrustSettingsResult, err
 		//
 		// See SecPVCGetTrustSettingsResult in Security-59306.41.2/trust/trustd/SecPolicyServer.c
 		if debugDarwinRoots && err != macOS.ErrNoTrustSettings {
-			fmt.Fprintf(os.Stderr, "crypto/x509: SecTrustSettingsCopyTrustSettings for SecTrustSettingsDomainAdmin failed: %s\n", err)
+			fmt.Fprintf(os.Stderr, "utils/crypto/x509: SecTrustSettingsCopyTrustSettings for SecTrustSettingsDomainAdmin failed: %s\n", err)
 		}
 		return macOS.SecTrustSettingsResultUnspecified, nil
 	}

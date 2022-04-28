@@ -9,9 +9,6 @@ package tls
 import (
 	"bytes"
 	"context"
-	"crypto/cipher"
-	"crypto/subtle"
-	"crypto/x509"
 	"errors"
 	"fmt"
 	"hash"
@@ -20,6 +17,9 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+	"utils/crypto/cipher"
+	"utils/crypto/subtle"
+	"utils/crypto/x509"
 )
 
 // A Conn represents a secured connection.

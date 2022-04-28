@@ -6,10 +6,6 @@ package x509
 
 import (
 	"crypto"
-	"crypto/ecdsa"
-	"crypto/elliptic"
-	"crypto/rand"
-	"crypto/x509/pkix"
 	"encoding/pem"
 	"errors"
 	"fmt"
@@ -18,6 +14,10 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"utils/crypto/ecdsa"
+	"utils/crypto/elliptic"
+	"utils/crypto/rand"
+	"utils/crypto/x509/pkix"
 )
 
 type verifyTest struct {

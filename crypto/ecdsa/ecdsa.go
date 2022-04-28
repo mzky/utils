@@ -28,14 +28,14 @@ package ecdsa
 
 import (
 	"crypto"
-	"crypto/aes"
-	"crypto/cipher"
-	"crypto/elliptic"
-	"crypto/internal/randutil"
-	"crypto/sha512"
 	"errors"
 	"io"
 	"math/big"
+	"utils/crypto/aes"
+	"utils/crypto/cipher"
+	"utils/crypto/elliptic"
+	"utils/crypto/internal/randutil"
+	"utils/crypto/sha512"
 
 	"golang.org/x/crypto/cryptobyte"
 	"golang.org/x/crypto/cryptobyte/asn1"

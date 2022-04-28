@@ -31,7 +31,7 @@ func TestLinkerGC(t *testing.T) {
 		{
 			name: "empty_import",
 			program: `package main
-import _ "crypto/tls"
+import _ "utils/crypto/tls"
 func main() {}
 `,
 			bad: []string{
@@ -43,28 +43,28 @@ func main() {}
 		{
 			name: "client_and_server",
 			program: `package main
-import "crypto/tls"
+import "utils/crypto/tls"
 func main() {
   tls.Dial("", "", nil)
   tls.Server(nil, nil)
 }
 `,
 			want: []string{
-				"crypto/tls.(*Conn).clientHandshake",
-				"crypto/tls.(*Conn).serverHandshake",
+				"utils/crypto/tls.(*Conn).clientHandshake",
+				"utils/crypto/tls.(*Conn).serverHandshake",
 			},
 		},
 		{
 			name: "only_client",
 			program: `package main
-import "crypto/tls"
+import "utils/crypto/tls"
 func main() { tls.Dial("", "", nil) }
 `,
 			want: []string{
-				"crypto/tls.(*Conn).clientHandshake",
+				"utils/crypto/tls.(*Conn).clientHandshake",
 			},
 			bad: []string{
-				"crypto/tls.(*Conn).serverHandshake",
+				"utils/crypto/tls.(*Conn).serverHandshake",
 			},
 		},
 		// TODO: add only_server like func main() { tls.Server(nil, nil) }

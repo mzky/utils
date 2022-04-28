@@ -5,12 +5,12 @@
 package x509
 
 import (
-	"crypto/ecdsa"
-	"crypto/elliptic"
 	"encoding/asn1"
 	"errors"
 	"fmt"
 	"math/big"
+	"utils/crypto/ecdsa"
+	"utils/crypto/elliptic"
 )
 
 const ecPrivKeyVersion = 1

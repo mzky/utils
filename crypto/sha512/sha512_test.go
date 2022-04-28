@@ -8,13 +8,13 @@ package sha512
 
 import (
 	"bytes"
-	"crypto/rand"
 	"encoding"
 	"encoding/hex"
 	"fmt"
 	"hash"
 	"io"
 	"testing"
+	"utils/crypto/rand"
 )
 
 type sha512Test struct {

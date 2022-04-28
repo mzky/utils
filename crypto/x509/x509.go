@@ -8,12 +8,6 @@ package x509
 import (
 	"bytes"
 	"crypto"
-	"crypto/ecdsa"
-	"crypto/ed25519"
-	"crypto/elliptic"
-	"crypto/rsa"
-	"crypto/sha1"
-	"crypto/x509/pkix"
 	"encoding/asn1"
 	"encoding/pem"
 	"errors"
@@ -25,12 +19,18 @@ import (
 	"strconv"
 	"time"
 	"unicode"
+	"utils/crypto/ecdsa"
+	"utils/crypto/ed25519"
+	"utils/crypto/elliptic"
+	"utils/crypto/rsa"
+	"utils/crypto/sha1"
+	"utils/crypto/x509/pkix"
 
 	// Explicitly import these for their crypto.RegisterHash init side-effects.
 	// Keep these as blank imports, even if they're imported above.
-	_ "crypto/sha1"
-	_ "crypto/sha256"
-	_ "crypto/sha512"
+	_ "utils/crypto/sha1"
+	_ "utils/crypto/sha256"
+	_ "utils/crypto/sha512"
 
 	"golang.org/x/crypto/cryptobyte"
 	cryptobyte_asn1 "golang.org/x/crypto/cryptobyte/asn1"

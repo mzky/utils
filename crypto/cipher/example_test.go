@@ -6,13 +6,13 @@ package cipher_test
 
 import (
 	"bytes"
-	"crypto/aes"
-	"crypto/cipher"
-	"crypto/rand"
 	"encoding/hex"
 	"fmt"
 	"io"
 	"os"
+	"utils/crypto/aes"
+	"utils/crypto/cipher"
+	"utils/crypto/rand"
 )
 
 func ExampleNewGCM_encrypt() {

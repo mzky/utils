@@ -7,15 +7,15 @@ package rsa
 import (
 	"bytes"
 	"crypto"
-	"crypto/rand"
-	"crypto/sha1"
-	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
 	"io"
 	"math/big"
 	"testing"
 	"testing/quick"
+	"utils/crypto/rand"
+	"utils/crypto/sha1"
+	"utils/crypto/sha256"
 )
 
 func decodeBase64(in string) []byte {

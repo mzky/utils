@@ -7,8 +7,8 @@
 package fiat
 
 import (
-	"crypto/subtle"
 	"errors"
+	"utils/crypto/subtle"
 )
 
 // P521Element is an integer modulo 2^521 - 1.

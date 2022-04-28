@@ -6,14 +6,14 @@ package rsa
 
 import (
 	"crypto"
-	"crypto/aes"
-	"crypto/cipher"
-	"crypto/rand"
-	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"io"
 	"os"
+	"utils/crypto/aes"
+	"utils/crypto/cipher"
+	"utils/crypto/rand"
+	"utils/crypto/sha256"
 )
 
 // RSA is able to encrypt only a very limited amount of data. In order

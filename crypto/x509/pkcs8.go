@@ -5,13 +5,13 @@
 package x509
 
 import (
-	"crypto/ecdsa"
-	"crypto/ed25519"
-	"crypto/rsa"
-	"crypto/x509/pkix"
 	"encoding/asn1"
 	"errors"
 	"fmt"
+	"utils/crypto/ecdsa"
+	"utils/crypto/ed25519"
+	"utils/crypto/rsa"
+	"utils/crypto/x509/pkix"
 )
 
 // pkcs8 reflects an ASN.1, PKCS #8 PrivateKey. See

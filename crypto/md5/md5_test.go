@@ -6,13 +6,13 @@ package md5
 
 import (
 	"bytes"
-	"crypto/rand"
 	"encoding"
 	"fmt"
 	"hash"
 	"io"
 	"testing"
 	"unsafe"
+	"utils/crypto/rand"
 )
 
 type md5Test struct {
