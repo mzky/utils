@@ -9,12 +9,12 @@ import (
 	"crypto"
 	"errors"
 	"fmt"
+	"github.com/mzky/utils/crypto/ecdsa"
+	"github.com/mzky/utils/crypto/ed25519"
+	"github.com/mzky/utils/crypto/elliptic"
+	"github.com/mzky/utils/crypto/rsa"
 	"hash"
 	"io"
-	"utils/crypto/ecdsa"
-	"utils/crypto/ed25519"
-	"utils/crypto/elliptic"
-	"utils/crypto/rsa"
 )
 
 // verifyHandshakeSignature verifies a signature against pre-hashed

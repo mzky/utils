@@ -11,10 +11,10 @@ import (
 	"encoding"
 	"encoding/hex"
 	"fmt"
+	"github.com/mzky/utils/crypto/rand"
 	"hash"
 	"io"
 	"testing"
-	"utils/crypto/rand"
 )
 
 type sha512Test struct {

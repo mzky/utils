@@ -10,6 +10,8 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/mzky/utils/crypto/ed25519"
+	"github.com/mzky/utils/crypto/x509"
 	"io"
 	"net"
 	"os"
@@ -20,8 +22,6 @@ import (
 	"sync"
 	"testing"
 	"time"
-	"utils/crypto/ed25519"
-	"utils/crypto/x509"
 )
 
 // TLS reference tests run a connection against a reference implementation

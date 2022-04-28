@@ -6,11 +6,11 @@ package edwards25519
 
 import (
 	"encoding/hex"
+	"github.com/mzky/utils/crypto/ed25519/internal/edwards25519/field"
 	"os"
 	"reflect"
 	"strings"
 	"testing"
-	"utils/crypto/ed25519/internal/edwards25519/field"
 )
 
 var B = NewGeneratorPoint()

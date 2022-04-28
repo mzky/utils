@@ -7,9 +7,9 @@ package elliptic
 import (
 	"bytes"
 	"encoding/hex"
+	"github.com/mzky/utils/crypto/rand"
 	"math/big"
 	"testing"
-	"utils/crypto/rand"
 )
 
 // genericParamsForCurve returns the dereferenced CurveParams for

@@ -7,12 +7,12 @@ package tls
 import (
 	"bytes"
 	"errors"
+	"github.com/mzky/utils/crypto/aes"
+	"github.com/mzky/utils/crypto/cipher"
+	"github.com/mzky/utils/crypto/hmac"
+	"github.com/mzky/utils/crypto/sha256"
+	"github.com/mzky/utils/crypto/subtle"
 	"io"
-	"utils/crypto/aes"
-	"utils/crypto/cipher"
-	"utils/crypto/hmac"
-	"utils/crypto/sha256"
-	"utils/crypto/subtle"
 
 	"golang.org/x/crypto/cryptobyte"
 )

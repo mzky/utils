@@ -7,11 +7,11 @@ package rsa
 import (
 	"crypto"
 	"errors"
+	"github.com/mzky/utils/crypto/subtle"
 	"io"
 	"math/big"
-	"utils/crypto/subtle"
 
-	"utils/crypto/internal/randutil"
+	"github.com/mzky/utils/crypto/internal/randutil"
 )
 
 // This file implements encryption and decryption using PKCS #1 v1.5 padding.
@@ -313,11 +313,11 @@ func pkcs1v15HashInfo(hash crypto.Hash, inLen int) (hashLen int, prefix []byte, 
 
 	hashLen = hash.Size()
 	if inLen != hashLen {
-		return 0, nil, errors.New("utils/crypto/rsa: input must be hashed message")
+		return 0, nil, errors.New("github.com/mzky/utils/crypto/rsa: input must be hashed message")
 	}
 	prefix, ok := hashPrefixes[hash]
 	if !ok {
-		return 0, nil, errors.New("utils/crypto/rsa: unsupported hash function")
+		return 0, nil, errors.New("github.com/mzky/utils/crypto/rsa: unsupported hash function")
 	}
 	return
 }

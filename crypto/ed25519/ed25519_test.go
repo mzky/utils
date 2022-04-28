@@ -10,10 +10,10 @@ import (
 	"compress/gzip"
 	"crypto"
 	"encoding/hex"
+	"github.com/mzky/utils/crypto/rand"
 	"os"
 	"strings"
 	"testing"
-	"utils/crypto/rand"
 )
 
 type zeroReader struct{}

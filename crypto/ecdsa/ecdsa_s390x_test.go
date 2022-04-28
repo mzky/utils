@@ -8,8 +8,8 @@
 package ecdsa
 
 import (
+	"github.com/mzky/utils/crypto/elliptic"
 	"testing"
-	"utils/crypto/elliptic"
 )
 
 func TestNoAsm(t *testing.T) {

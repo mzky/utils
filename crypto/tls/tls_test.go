@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/mzky/utils/crypto/x509"
 	"internal/testenv"
 	"io"
 	"math"
@@ -21,7 +22,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-	"utils/crypto/x509"
 )
 
 var rsaCertPEM = `-----BEGIN CERTIFICATE-----

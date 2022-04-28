@@ -12,9 +12,9 @@ package cipher_test
 
 import (
 	"bytes"
+	"github.com/mzky/utils/crypto/aes"
+	"github.com/mzky/utils/crypto/cipher"
 	"testing"
-	"utils/crypto/aes"
-	"utils/crypto/cipher"
 )
 
 var cbcAESTests = []struct {

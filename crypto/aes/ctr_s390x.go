@@ -6,8 +6,8 @@ package aes
 
 import (
 	"encoding/binary"
-	"utils/crypto/cipher"
-	"utils/crypto/internal/subtle"
+	"github.com/mzky/utils/crypto/cipher"
+	"github.com/mzky/utils/crypto/internal/subtle"
 )
 
 // Assert that aesCipherAsm implements the ctrAble interface.
@@ -66,10 +66,10 @@ func (c *aesctr) refill() {
 
 func (c *aesctr) XORKeyStream(dst, src []byte) {
 	if len(dst) < len(src) {
-		panic("utils/crypto/cipher: output smaller than input")
+		panic("github.com/mzky/utils/crypto/cipher: output smaller than input")
 	}
 	if subtle.InexactOverlap(dst[:len(src)], src) {
-		panic("utils/crypto/cipher: invalid buffer overlap")
+		panic("github.com/mzky/utils/crypto/cipher: invalid buffer overlap")
 	}
 	for len(src) > 0 {
 		if len(c.buffer) == 0 {

@@ -8,17 +8,17 @@ import (
 	"bufio"
 	"compress/bzip2"
 	"encoding/hex"
+	"github.com/mzky/utils/crypto/elliptic"
+	"github.com/mzky/utils/crypto/rand"
+	"github.com/mzky/utils/crypto/sha1"
+	"github.com/mzky/utils/crypto/sha256"
+	"github.com/mzky/utils/crypto/sha512"
 	"hash"
 	"io"
 	"math/big"
 	"os"
 	"strings"
 	"testing"
-	"utils/crypto/elliptic"
-	"utils/crypto/rand"
-	"utils/crypto/sha1"
-	"utils/crypto/sha256"
-	"utils/crypto/sha512"
 )
 
 func testAllCurves(t *testing.T, f func(*testing.T, elliptic.Curve)) {

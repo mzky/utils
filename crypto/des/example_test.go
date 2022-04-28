@@ -4,7 +4,7 @@
 
 package des_test
 
-import "utils/crypto/des"
+import "github.com/mzky/utils/crypto/des"
 
 func ExampleNewTripleDESCipher() {
 	// NewTripleDESCipher can also be used when EDE2 is required by

@@ -7,8 +7,8 @@ package field
 
 import (
 	"encoding/binary"
+	"github.com/mzky/utils/crypto/subtle"
 	"math/bits"
-	"utils/crypto/subtle"
 )
 
 // Element represents an element of the field GF(2^255-19). Note that this

@@ -5,8 +5,8 @@
 package aes
 
 import (
-	"utils/crypto/cipher"
-	"utils/crypto/internal/subtle"
+	"github.com/mzky/utils/crypto/cipher"
+	"github.com/mzky/utils/crypto/internal/subtle"
 )
 
 // Assert that aesCipherAsm implements the cbcEncAble and cbcDecAble interfaces.
@@ -44,13 +44,13 @@ func cryptBlocksChain(c code, iv, key, dst, src *byte, length int)
 
 func (x *cbc) CryptBlocks(dst, src []byte) {
 	if len(src)%BlockSize != 0 {
-		panic("utils/crypto/cipher: input not full blocks")
+		panic("github.com/mzky/utils/crypto/cipher: input not full blocks")
 	}
 	if len(dst) < len(src) {
-		panic("utils/crypto/cipher: output smaller than input")
+		panic("github.com/mzky/utils/crypto/cipher: output smaller than input")
 	}
 	if subtle.InexactOverlap(dst[:len(src)], src) {
-		panic("utils/crypto/cipher: invalid buffer overlap")
+		panic("github.com/mzky/utils/crypto/cipher: invalid buffer overlap")
 	}
 	if len(src) > 0 {
 		cryptBlocksChain(x.c, &x.iv[0], &x.b.key[0], &dst[0], &src[0], len(src))

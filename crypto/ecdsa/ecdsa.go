@@ -29,13 +29,13 @@ package ecdsa
 import (
 	"crypto"
 	"errors"
+	"github.com/mzky/utils/crypto/aes"
+	"github.com/mzky/utils/crypto/cipher"
+	"github.com/mzky/utils/crypto/elliptic"
+	"github.com/mzky/utils/crypto/internal/randutil"
+	"github.com/mzky/utils/crypto/sha512"
 	"io"
 	"math/big"
-	"utils/crypto/aes"
-	"utils/crypto/cipher"
-	"utils/crypto/elliptic"
-	"utils/crypto/internal/randutil"
-	"utils/crypto/sha512"
 
 	"golang.org/x/crypto/cryptobyte"
 	"golang.org/x/crypto/cryptobyte/asn1"

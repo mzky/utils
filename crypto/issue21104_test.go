@@ -5,10 +5,10 @@
 package crypto
 
 import (
+	"github.com/mzky/utils/crypto/aes"
+	"github.com/mzky/utils/crypto/cipher"
+	"github.com/mzky/utils/crypto/rc4"
 	"testing"
-	"utils/crypto/aes"
-	"utils/crypto/cipher"
-	"utils/crypto/rc4"
 )
 
 func TestRC4OutOfBoundsWrite(t *testing.T) {

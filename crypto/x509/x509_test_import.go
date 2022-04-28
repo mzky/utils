@@ -12,12 +12,12 @@ package main
 
 import (
 	"encoding/pem"
+	"github.com/mzky/utils/crypto/rand"
+	"github.com/mzky/utils/crypto/x509"
+	"github.com/mzky/utils/crypto/x509/pkix"
 	"math/big"
 	"strings"
 	"time"
-	"utils/crypto/rand"
-	"utils/crypto/x509"
-	"utils/crypto/x509/pkix"
 )
 
 func main() {

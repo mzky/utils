@@ -8,12 +8,12 @@ import (
 	"crypto"
 	"encoding/hex"
 	"fmt"
+	"github.com/mzky/utils/crypto/aes"
+	"github.com/mzky/utils/crypto/cipher"
+	"github.com/mzky/utils/crypto/rand"
+	"github.com/mzky/utils/crypto/sha256"
 	"io"
 	"os"
-	"utils/crypto/aes"
-	"utils/crypto/cipher"
-	"utils/crypto/rand"
-	"utils/crypto/sha256"
 )
 
 // RSA is able to encrypt only a very limited amount of data. In order

@@ -6,7 +6,7 @@
 
 package cipher
 
-import "utils/crypto/internal/subtle"
+import "github.com/mzky/utils/crypto/internal/subtle"
 
 type ofb struct {
 	b       Block
@@ -57,10 +57,10 @@ func (x *ofb) refill() {
 
 func (x *ofb) XORKeyStream(dst, src []byte) {
 	if len(dst) < len(src) {
-		panic("utils/crypto/cipher: output smaller than input")
+		panic("github.com/mzky/utils/crypto/cipher: output smaller than input")
 	}
 	if subtle.InexactOverlap(dst[:len(src)], src) {
-		panic("utils/crypto/cipher: invalid buffer overlap")
+		panic("github.com/mzky/utils/crypto/cipher: invalid buffer overlap")
 	}
 	for len(src) > 0 {
 		if x.outUsed >= len(x.out)-x.b.BlockSize() {

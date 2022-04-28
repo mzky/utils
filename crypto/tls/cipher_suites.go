@@ -7,16 +7,16 @@ package tls
 import (
 	"crypto"
 	"fmt"
+	"github.com/mzky/utils/crypto/aes"
+	"github.com/mzky/utils/crypto/cipher"
+	"github.com/mzky/utils/crypto/des"
+	"github.com/mzky/utils/crypto/hmac"
+	"github.com/mzky/utils/crypto/rc4"
+	"github.com/mzky/utils/crypto/sha1"
+	"github.com/mzky/utils/crypto/sha256"
 	"hash"
 	"internal/cpu"
 	"runtime"
-	"utils/crypto/aes"
-	"utils/crypto/cipher"
-	"utils/crypto/des"
-	"utils/crypto/hmac"
-	"utils/crypto/rc4"
-	"utils/crypto/sha1"
-	"utils/crypto/sha256"
 
 	"golang.org/x/crypto/chacha20poly1305"
 )

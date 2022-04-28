@@ -6,10 +6,10 @@ package sha1_test
 
 import (
 	"fmt"
+	"github.com/mzky/utils/crypto/sha1"
 	"io"
 	"log"
 	"os"
-	"utils/crypto/sha1"
 )
 
 func ExampleNew() {

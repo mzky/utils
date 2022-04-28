@@ -10,6 +10,10 @@ import (
 	"encoding/hex"
 	"encoding/pem"
 	"fmt"
+	"github.com/mzky/utils/crypto/ecdsa"
+	"github.com/mzky/utils/crypto/elliptic"
+	"github.com/mzky/utils/crypto/rand"
+	"github.com/mzky/utils/crypto/x509/pkix"
 	"math/big"
 	"net"
 	"net/url"
@@ -20,10 +24,6 @@ import (
 	"sync"
 	"testing"
 	"time"
-	"utils/crypto/ecdsa"
-	"utils/crypto/elliptic"
-	"utils/crypto/rand"
-	"utils/crypto/x509/pkix"
 )
 
 const (

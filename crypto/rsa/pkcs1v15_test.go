@@ -9,13 +9,13 @@ import (
 	"crypto"
 	"encoding/base64"
 	"encoding/hex"
+	"github.com/mzky/utils/crypto/rand"
+	"github.com/mzky/utils/crypto/sha1"
+	"github.com/mzky/utils/crypto/sha256"
 	"io"
 	"math/big"
 	"testing"
 	"testing/quick"
-	"utils/crypto/rand"
-	"utils/crypto/sha1"
-	"utils/crypto/sha256"
 )
 
 func decodeBase64(in string) []byte {

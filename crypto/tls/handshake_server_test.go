@@ -11,6 +11,8 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"github.com/mzky/utils/crypto/elliptic"
+	"github.com/mzky/utils/crypto/x509"
 	"io"
 	"net"
 	"os"
@@ -20,8 +22,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-	"utils/crypto/elliptic"
-	"utils/crypto/x509"
 
 	"golang.org/x/crypto/curve25519"
 )

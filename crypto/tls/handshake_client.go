@@ -10,17 +10,17 @@ import (
 	"crypto"
 	"errors"
 	"fmt"
+	"github.com/mzky/utils/crypto/ecdsa"
+	"github.com/mzky/utils/crypto/ed25519"
+	"github.com/mzky/utils/crypto/rsa"
+	"github.com/mzky/utils/crypto/subtle"
+	"github.com/mzky/utils/crypto/x509"
 	"hash"
 	"io"
 	"net"
 	"strings"
 	"sync/atomic"
 	"time"
-	"utils/crypto/ecdsa"
-	"utils/crypto/ed25519"
-	"utils/crypto/rsa"
-	"utils/crypto/subtle"
-	"utils/crypto/x509"
 )
 
 type clientHandshakeState struct {

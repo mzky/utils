@@ -7,7 +7,7 @@ package edwards25519
 import (
 	"encoding/binary"
 	"errors"
-	"utils/crypto/subtle"
+	"github.com/mzky/utils/crypto/subtle"
 )
 
 // A Scalar is an integer modulo

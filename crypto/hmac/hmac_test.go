@@ -6,12 +6,12 @@ package hmac
 
 import (
 	"fmt"
+	"github.com/mzky/utils/crypto/md5"
+	"github.com/mzky/utils/crypto/sha1"
+	"github.com/mzky/utils/crypto/sha256"
+	"github.com/mzky/utils/crypto/sha512"
 	"hash"
 	"testing"
-	"utils/crypto/md5"
-	"utils/crypto/sha1"
-	"utils/crypto/sha256"
-	"utils/crypto/sha512"
 )
 
 type hmacTest struct {

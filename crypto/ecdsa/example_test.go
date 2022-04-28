@@ -6,10 +6,10 @@ package ecdsa_test
 
 import (
 	"fmt"
-	"utils/crypto/ecdsa"
-	"utils/crypto/elliptic"
-	"utils/crypto/rand"
-	"utils/crypto/sha256"
+	"github.com/mzky/utils/crypto/ecdsa"
+	"github.com/mzky/utils/crypto/elliptic"
+	"github.com/mzky/utils/crypto/rand"
+	"github.com/mzky/utils/crypto/sha256"
 )
 
 func Example() {

@@ -8,10 +8,10 @@
 package elliptic
 
 import (
+	"github.com/mzky/utils/crypto/subtle"
 	"internal/cpu"
 	"math/big"
 	"unsafe"
-	"utils/crypto/subtle"
 )
 
 const (

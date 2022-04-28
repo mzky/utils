@@ -7,10 +7,10 @@ package cipher_test
 import (
 	"bytes"
 	"encoding/hex"
+	"github.com/mzky/utils/crypto/aes"
+	"github.com/mzky/utils/crypto/cipher"
+	"github.com/mzky/utils/crypto/rand"
 	"testing"
-	"utils/crypto/aes"
-	"utils/crypto/cipher"
-	"utils/crypto/rand"
 )
 
 // cfbTests contains the test vectors from

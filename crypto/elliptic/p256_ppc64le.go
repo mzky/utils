@@ -9,8 +9,8 @@ package elliptic
 
 import (
 	"encoding/binary"
+	"github.com/mzky/utils/crypto/subtle"
 	"math/big"
-	"utils/crypto/subtle"
 )
 
 // This was ported from the s390x implementation for ppc64le.

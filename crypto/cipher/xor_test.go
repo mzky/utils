@@ -7,10 +7,10 @@ package cipher_test
 import (
 	"bytes"
 	"fmt"
+	"github.com/mzky/utils/crypto/cipher"
+	"github.com/mzky/utils/crypto/rand"
 	"io"
 	"testing"
-	"utils/crypto/cipher"
-	"utils/crypto/rand"
 )
 
 func TestXOR(t *testing.T) {

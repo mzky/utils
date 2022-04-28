@@ -150,7 +150,7 @@ func (d *digest) MarshalBinary() ([]byte, error) {
 	case crypto.SHA512:
 		b = append(b, magic512...)
 	default:
-		return nil, errors.New("utils/crypto/sha512: invalid hash function")
+		return nil, errors.New("github.com/mzky/utils/crypto/sha512: invalid hash function")
 	}
 	b = appendUint64(b, d.h[0])
 	b = appendUint64(b, d.h[1])
@@ -168,7 +168,7 @@ func (d *digest) MarshalBinary() ([]byte, error) {
 
 func (d *digest) UnmarshalBinary(b []byte) error {
 	if len(b) < len(magic512) {
-		return errors.New("utils/crypto/sha512: invalid hash state identifier")
+		return errors.New("github.com/mzky/utils/crypto/sha512: invalid hash state identifier")
 	}
 	switch {
 	case d.function == crypto.SHA384 && string(b[:len(magic384)]) == magic384:
@@ -176,10 +176,10 @@ func (d *digest) UnmarshalBinary(b []byte) error {
 	case d.function == crypto.SHA512_256 && string(b[:len(magic512_256)]) == magic512_256:
 	case d.function == crypto.SHA512 && string(b[:len(magic512)]) == magic512:
 	default:
-		return errors.New("utils/crypto/sha512: invalid hash state identifier")
+		return errors.New("github.com/mzky/utils/crypto/sha512: invalid hash state identifier")
 	}
 	if len(b) != marshaledSize {
-		return errors.New("utils/crypto/sha512: invalid hash state size")
+		return errors.New("github.com/mzky/utils/crypto/sha512: invalid hash state size")
 	}
 	b = b[len(magic512):]
 	b, d.h[0] = consumeUint64(b)

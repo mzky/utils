@@ -7,12 +7,12 @@ package rand_test
 import (
 	"bytes"
 	"fmt"
+	"github.com/mzky/utils/crypto/rand"
 	"io"
 	"math/big"
 	mathrand "math/rand"
 	"testing"
 	"time"
-	"utils/crypto/rand"
 )
 
 // https://golang.org/issue/6849.

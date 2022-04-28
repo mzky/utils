@@ -5,9 +5,9 @@
 package fiat_test
 
 import (
+	"github.com/mzky/utils/crypto/elliptic/internal/fiat"
+	"github.com/mzky/utils/crypto/rand"
 	"testing"
-	"utils/crypto/elliptic/internal/fiat"
-	"utils/crypto/rand"
 )
 
 func p521Random(t *testing.T) *fiat.P521Element {

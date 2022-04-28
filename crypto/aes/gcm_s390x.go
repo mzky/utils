@@ -7,10 +7,10 @@ package aes
 import (
 	"encoding/binary"
 	"errors"
+	"github.com/mzky/utils/crypto/cipher"
+	subtleoverlap "github.com/mzky/utils/crypto/internal/subtle"
+	"github.com/mzky/utils/crypto/subtle"
 	"internal/cpu"
-	"utils/crypto/cipher"
-	subtleoverlap "utils/crypto/internal/subtle"
-	"utils/crypto/subtle"
 )
 
 // This file contains two implementations of AES-GCM. The first implementation
@@ -202,15 +202,15 @@ func (g *gcmAsm) auth(out, ciphertext, additionalData []byte, tagMask *[gcmTagSi
 // details.
 func (g *gcmAsm) Seal(dst, nonce, plaintext, data []byte) []byte {
 	if len(nonce) != g.nonceSize {
-		panic("utils/crypto/cipher: incorrect nonce length given to GCM")
+		panic("github.com/mzky/utils/crypto/cipher: incorrect nonce length given to GCM")
 	}
 	if uint64(len(plaintext)) > ((1<<32)-2)*BlockSize {
-		panic("utils/crypto/cipher: message too large for GCM")
+		panic("github.com/mzky/utils/crypto/cipher: message too large for GCM")
 	}
 
 	ret, out := sliceForAppend(dst, len(plaintext)+g.tagSize)
 	if subtleoverlap.InexactOverlap(out[:len(plaintext)], plaintext) {
-		panic("utils/crypto/cipher: invalid buffer overlap")
+		panic("github.com/mzky/utils/crypto/cipher: invalid buffer overlap")
 	}
 
 	counter := g.deriveCounter(nonce)
@@ -231,12 +231,12 @@ func (g *gcmAsm) Seal(dst, nonce, plaintext, data []byte) []byte {
 // for details.
 func (g *gcmAsm) Open(dst, nonce, ciphertext, data []byte) ([]byte, error) {
 	if len(nonce) != g.nonceSize {
-		panic("utils/crypto/cipher: incorrect nonce length given to GCM")
+		panic("github.com/mzky/utils/crypto/cipher: incorrect nonce length given to GCM")
 	}
 	// Sanity check to prevent the authentication from always succeeding if an implementation
 	// leaves tagSize uninitialized, for example.
 	if g.tagSize < gcmMinimumTagSize {
-		panic("utils/crypto/cipher: incorrect GCM tag size")
+		panic("github.com/mzky/utils/crypto/cipher: incorrect GCM tag size")
 	}
 	if len(ciphertext) < g.tagSize {
 		return nil, errOpen
@@ -259,7 +259,7 @@ func (g *gcmAsm) Open(dst, nonce, ciphertext, data []byte) ([]byte, error) {
 
 	ret, out := sliceForAppend(dst, len(ciphertext))
 	if subtleoverlap.InexactOverlap(out, ciphertext) {
-		panic("utils/crypto/cipher: invalid buffer overlap")
+		panic("github.com/mzky/utils/crypto/cipher: invalid buffer overlap")
 	}
 
 	if subtle.ConstantTimeCompare(expectedTag[:g.tagSize], tag) != 1 {
@@ -302,15 +302,15 @@ func kmaGCM(fn code, key, dst, src, aad []byte, tag *[16]byte, cnt *gcmCount)
 // details.
 func (g *gcmKMA) Seal(dst, nonce, plaintext, data []byte) []byte {
 	if len(nonce) != g.nonceSize {
-		panic("utils/crypto/cipher: incorrect nonce length given to GCM")
+		panic("github.com/mzky/utils/crypto/cipher: incorrect nonce length given to GCM")
 	}
 	if uint64(len(plaintext)) > ((1<<32)-2)*BlockSize {
-		panic("utils/crypto/cipher: message too large for GCM")
+		panic("github.com/mzky/utils/crypto/cipher: message too large for GCM")
 	}
 
 	ret, out := sliceForAppend(dst, len(plaintext)+g.tagSize)
 	if subtleoverlap.InexactOverlap(out[:len(plaintext)], plaintext) {
-		panic("utils/crypto/cipher: invalid buffer overlap")
+		panic("github.com/mzky/utils/crypto/cipher: invalid buffer overlap")
 	}
 
 	counter := g.deriveCounter(nonce)
@@ -327,7 +327,7 @@ func (g *gcmKMA) Seal(dst, nonce, plaintext, data []byte) []byte {
 // for details.
 func (g *gcmKMA) Open(dst, nonce, ciphertext, data []byte) ([]byte, error) {
 	if len(nonce) != g.nonceSize {
-		panic("utils/crypto/cipher: incorrect nonce length given to GCM")
+		panic("github.com/mzky/utils/crypto/cipher: incorrect nonce length given to GCM")
 	}
 	if len(ciphertext) < g.tagSize {
 		return nil, errOpen
@@ -340,11 +340,11 @@ func (g *gcmKMA) Open(dst, nonce, ciphertext, data []byte) ([]byte, error) {
 	ciphertext = ciphertext[:len(ciphertext)-g.tagSize]
 	ret, out := sliceForAppend(dst, len(ciphertext))
 	if subtleoverlap.InexactOverlap(out, ciphertext) {
-		panic("utils/crypto/cipher: invalid buffer overlap")
+		panic("github.com/mzky/utils/crypto/cipher: invalid buffer overlap")
 	}
 
 	if g.tagSize < gcmMinimumTagSize {
-		panic("utils/crypto/cipher: incorrect GCM tag size")
+		panic("github.com/mzky/utils/crypto/cipher: incorrect GCM tag size")
 	}
 
 	counter := g.deriveCounter(nonce)

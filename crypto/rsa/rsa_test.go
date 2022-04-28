@@ -7,11 +7,11 @@ package rsa
 import (
 	"bytes"
 	"crypto"
+	"github.com/mzky/utils/crypto/rand"
+	"github.com/mzky/utils/crypto/sha1"
+	"github.com/mzky/utils/crypto/sha256"
 	"math/big"
 	"testing"
-	"utils/crypto/rand"
-	"utils/crypto/sha1"
-	"utils/crypto/sha256"
 )
 
 func TestKeyGeneration(t *testing.T) {

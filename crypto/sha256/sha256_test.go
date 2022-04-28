@@ -10,10 +10,10 @@ import (
 	"bytes"
 	"encoding"
 	"fmt"
+	"github.com/mzky/utils/crypto/rand"
 	"hash"
 	"io"
 	"testing"
-	"utils/crypto/rand"
 )
 
 type sha256Test struct {

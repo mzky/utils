@@ -8,12 +8,12 @@ import (
 	"bytes"
 	"encoding/hex"
 	"errors"
+	"github.com/mzky/utils/crypto/aes"
+	"github.com/mzky/utils/crypto/cipher"
+	"github.com/mzky/utils/crypto/rand"
 	"io"
 	"reflect"
 	"testing"
-	"utils/crypto/aes"
-	"utils/crypto/cipher"
-	"utils/crypto/rand"
 )
 
 var aesGCMTests = []struct {

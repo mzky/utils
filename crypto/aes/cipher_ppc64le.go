@@ -5,8 +5,8 @@
 package aes
 
 import (
-	"utils/crypto/cipher"
-	"utils/crypto/internal/subtle"
+	"github.com/mzky/utils/crypto/cipher"
+	"github.com/mzky/utils/crypto/internal/subtle"
 )
 
 // defined in asm_ppc64le.s
@@ -50,26 +50,26 @@ func (c *aesCipherAsm) BlockSize() int { return BlockSize }
 
 func (c *aesCipherAsm) Encrypt(dst, src []byte) {
 	if len(src) < BlockSize {
-		panic("utils/crypto/aes: input not full block")
+		panic("github.com/mzky/utils/crypto/aes: input not full block")
 	}
 	if len(dst) < BlockSize {
-		panic("utils/crypto/aes: output not full block")
+		panic("github.com/mzky/utils/crypto/aes: output not full block")
 	}
 	if subtle.InexactOverlap(dst[:BlockSize], src[:BlockSize]) {
-		panic("utils/crypto/aes: invalid buffer overlap")
+		panic("github.com/mzky/utils/crypto/aes: invalid buffer overlap")
 	}
 	encryptBlockAsm(&dst[0], &src[0], &c.enc[0])
 }
 
 func (c *aesCipherAsm) Decrypt(dst, src []byte) {
 	if len(src) < BlockSize {
-		panic("utils/crypto/aes: input not full block")
+		panic("github.com/mzky/utils/crypto/aes: input not full block")
 	}
 	if len(dst) < BlockSize {
-		panic("utils/crypto/aes: output not full block")
+		panic("github.com/mzky/utils/crypto/aes: output not full block")
 	}
 	if subtle.InexactOverlap(dst[:BlockSize], src[:BlockSize]) {
-		panic("utils/crypto/aes: invalid buffer overlap")
+		panic("github.com/mzky/utils/crypto/aes: invalid buffer overlap")
 	}
 	decryptBlockAsm(&dst[0], &src[0], &c.dec[0])
 }

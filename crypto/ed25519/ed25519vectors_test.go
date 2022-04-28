@@ -7,12 +7,12 @@ package ed25519_test
 import (
 	"encoding/hex"
 	"encoding/json"
+	"github.com/mzky/utils/crypto/ed25519"
 	"internal/testenv"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"testing"
-	"utils/crypto/ed25519"
 )
 
 // TestEd25519Vectors runs a very large set of test vectors that exercise all

@@ -6,10 +6,10 @@ package cipher_test
 
 import (
 	"bytes"
+	"github.com/mzky/utils/crypto/aes"
+	"github.com/mzky/utils/crypto/cipher"
+	"github.com/mzky/utils/crypto/des"
 	"testing"
-	"utils/crypto/aes"
-	"utils/crypto/cipher"
-	"utils/crypto/des"
 )
 
 func TestCryptBlocks(t *testing.T) {
@@ -17,12 +17,12 @@ func TestCryptBlocks(t *testing.T) {
 	block, _ := aes.NewCipher(buf)
 
 	mode := cipher.NewCBCDecrypter(block, buf)
-	mustPanic(t, "utils/crypto/cipher: input not full blocks", func() { mode.CryptBlocks(buf, buf[:3]) })
-	mustPanic(t, "utils/crypto/cipher: output smaller than input", func() { mode.CryptBlocks(buf[:3], buf) })
+	mustPanic(t, "github.com/mzky/utils/crypto/cipher: input not full blocks", func() { mode.CryptBlocks(buf, buf[:3]) })
+	mustPanic(t, "github.com/mzky/utils/crypto/cipher: output smaller than input", func() { mode.CryptBlocks(buf[:3], buf) })
 
 	mode = cipher.NewCBCEncrypter(block, buf)
-	mustPanic(t, "utils/crypto/cipher: input not full blocks", func() { mode.CryptBlocks(buf, buf[:3]) })
-	mustPanic(t, "utils/crypto/cipher: output smaller than input", func() { mode.CryptBlocks(buf[:3], buf) })
+	mustPanic(t, "github.com/mzky/utils/crypto/cipher: input not full blocks", func() { mode.CryptBlocks(buf, buf[:3]) })
+	mustPanic(t, "github.com/mzky/utils/crypto/cipher: output smaller than input", func() { mode.CryptBlocks(buf[:3], buf) })
 }
 
 func mustPanic(t *testing.T, msg string, f func()) {

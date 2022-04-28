@@ -8,11 +8,11 @@ import (
 	"bytes"
 	"encoding"
 	"fmt"
+	"github.com/mzky/utils/crypto/rand"
 	"hash"
 	"io"
 	"testing"
 	"unsafe"
-	"utils/crypto/rand"
 )
 
 type md5Test struct {

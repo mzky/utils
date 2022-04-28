@@ -7,13 +7,13 @@ package x509
 import (
 	"bytes"
 	"encoding/hex"
+	"github.com/mzky/utils/crypto/ecdsa"
+	"github.com/mzky/utils/crypto/ed25519"
+	"github.com/mzky/utils/crypto/elliptic"
+	"github.com/mzky/utils/crypto/rsa"
 	"reflect"
 	"strings"
 	"testing"
-	"utils/crypto/ecdsa"
-	"utils/crypto/ed25519"
-	"utils/crypto/elliptic"
-	"utils/crypto/rsa"
 )
 
 // Generated using:

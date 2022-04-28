@@ -6,10 +6,10 @@ package sha256_test
 
 import (
 	"fmt"
+	"github.com/mzky/utils/crypto/sha256"
 	"io"
 	"log"
 	"os"
-	"utils/crypto/sha256"
 )
 
 func ExampleSum256() {

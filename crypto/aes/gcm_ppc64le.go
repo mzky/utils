@@ -10,8 +10,8 @@ package aes
 import (
 	"encoding/binary"
 	"errors"
-	"utils/crypto/cipher"
-	"utils/crypto/subtle"
+	"github.com/mzky/utils/crypto/cipher"
+	"github.com/mzky/utils/crypto/subtle"
 )
 
 // This file implements GCM using an optimized GHASH function.

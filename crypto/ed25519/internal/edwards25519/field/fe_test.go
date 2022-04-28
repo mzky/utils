@@ -7,6 +7,7 @@ package field
 import (
 	"bytes"
 	"encoding/hex"
+	"github.com/mzky/utils/crypto/rand"
 	"io"
 	"math/big"
 	"math/bits"
@@ -14,7 +15,6 @@ import (
 	"reflect"
 	"testing"
 	"testing/quick"
-	"utils/crypto/rand"
 )
 
 func (v Element) String() string {

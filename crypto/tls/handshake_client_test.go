@@ -12,6 +12,8 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"github.com/mzky/utils/crypto/rsa"
+	"github.com/mzky/utils/crypto/x509"
 	"io"
 	"math/big"
 	"net"
@@ -24,8 +26,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-	"utils/crypto/rsa"
-	"utils/crypto/x509"
 )
 
 // Note: see comment in handshake_test.go for details of how the reference

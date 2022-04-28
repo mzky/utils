@@ -6,9 +6,9 @@ package des
 
 import (
 	"encoding/binary"
+	"github.com/mzky/utils/crypto/cipher"
+	"github.com/mzky/utils/crypto/internal/subtle"
 	"strconv"
-	"utils/crypto/cipher"
-	"utils/crypto/internal/subtle"
 )
 
 // The DES block size in bytes.
@@ -17,7 +17,7 @@ const BlockSize = 8
 type KeySizeError int
 
 func (k KeySizeError) Error() string {
-	return "utils/crypto/des: invalid key size " + strconv.Itoa(int(k))
+	return "github.com/mzky/utils/crypto/des: invalid key size " + strconv.Itoa(int(k))
 }
 
 // desCipher is an instance of DES encryption.
@@ -40,26 +40,26 @@ func (c *desCipher) BlockSize() int { return BlockSize }
 
 func (c *desCipher) Encrypt(dst, src []byte) {
 	if len(src) < BlockSize {
-		panic("utils/crypto/des: input not full block")
+		panic("github.com/mzky/utils/crypto/des: input not full block")
 	}
 	if len(dst) < BlockSize {
-		panic("utils/crypto/des: output not full block")
+		panic("github.com/mzky/utils/crypto/des: output not full block")
 	}
 	if subtle.InexactOverlap(dst[:BlockSize], src[:BlockSize]) {
-		panic("utils/crypto/des: invalid buffer overlap")
+		panic("github.com/mzky/utils/crypto/des: invalid buffer overlap")
 	}
 	encryptBlock(c.subkeys[:], dst, src)
 }
 
 func (c *desCipher) Decrypt(dst, src []byte) {
 	if len(src) < BlockSize {
-		panic("utils/crypto/des: input not full block")
+		panic("github.com/mzky/utils/crypto/des: input not full block")
 	}
 	if len(dst) < BlockSize {
-		panic("utils/crypto/des: output not full block")
+		panic("github.com/mzky/utils/crypto/des: output not full block")
 	}
 	if subtle.InexactOverlap(dst[:BlockSize], src[:BlockSize]) {
-		panic("utils/crypto/des: invalid buffer overlap")
+		panic("github.com/mzky/utils/crypto/des: invalid buffer overlap")
 	}
 	decryptBlock(c.subkeys[:], dst, src)
 }
@@ -86,13 +86,13 @@ func (c *tripleDESCipher) BlockSize() int { return BlockSize }
 
 func (c *tripleDESCipher) Encrypt(dst, src []byte) {
 	if len(src) < BlockSize {
-		panic("utils/crypto/des: input not full block")
+		panic("github.com/mzky/utils/crypto/des: input not full block")
 	}
 	if len(dst) < BlockSize {
-		panic("utils/crypto/des: output not full block")
+		panic("github.com/mzky/utils/crypto/des: output not full block")
 	}
 	if subtle.InexactOverlap(dst[:BlockSize], src[:BlockSize]) {
-		panic("utils/crypto/des: invalid buffer overlap")
+		panic("github.com/mzky/utils/crypto/des: invalid buffer overlap")
 	}
 
 	b := binary.BigEndian.Uint64(src)
@@ -121,13 +121,13 @@ func (c *tripleDESCipher) Encrypt(dst, src []byte) {
 
 func (c *tripleDESCipher) Decrypt(dst, src []byte) {
 	if len(src) < BlockSize {
-		panic("utils/crypto/des: input not full block")
+		panic("github.com/mzky/utils/crypto/des: input not full block")
 	}
 	if len(dst) < BlockSize {
-		panic("utils/crypto/des: output not full block")
+		panic("github.com/mzky/utils/crypto/des: output not full block")
 	}
 	if subtle.InexactOverlap(dst[:BlockSize], src[:BlockSize]) {
-		panic("utils/crypto/des: invalid buffer overlap")
+		panic("github.com/mzky/utils/crypto/des: invalid buffer overlap")
 	}
 
 	b := binary.BigEndian.Uint64(src)

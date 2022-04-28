@@ -8,9 +8,9 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/pem"
+	"github.com/mzky/utils/crypto/rand"
 	"strings"
 	"testing"
-	"utils/crypto/rand"
 )
 
 func TestDecrypt(t *testing.T) {

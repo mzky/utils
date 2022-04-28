@@ -11,7 +11,7 @@ import (
 //go:generate go run . -out ../fe_amd64.s -stubs ../fe_amd64.go -pkg field
 
 func main() {
-	Package("utils/crypto/ed25519/internal/edwards25519/field")
+	Package("github.com/mzky/utils/crypto/ed25519/internal/edwards25519/field")
 	ConstraintExpr("amd64,gc,!purego")
 	feMul()
 	feSquare()

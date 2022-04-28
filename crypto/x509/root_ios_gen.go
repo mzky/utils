@@ -23,6 +23,9 @@ import (
 	"encoding/pem"
 	"flag"
 	"fmt"
+	"github.com/mzky/utils/crypto/sha256"
+	"github.com/mzky/utils/crypto/tls"
+	"github.com/mzky/utils/crypto/x509"
 	"go/format"
 	"io"
 	"log"
@@ -32,9 +35,6 @@ import (
 	"sort"
 	"strings"
 	"time"
-	"utils/crypto/sha256"
-	"utils/crypto/tls"
-	"utils/crypto/x509"
 )
 
 func main() {

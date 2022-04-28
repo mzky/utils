@@ -6,7 +6,7 @@ package edwards25519
 
 import (
 	"errors"
-	"utils/crypto/ed25519/internal/edwards25519/field"
+	"github.com/mzky/utils/crypto/ed25519/internal/edwards25519/field"
 )
 
 // Point types.

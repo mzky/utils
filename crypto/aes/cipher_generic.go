@@ -8,7 +8,7 @@
 package aes
 
 import (
-	"utils/crypto/cipher"
+	"github.com/mzky/utils/crypto/cipher"
 )
 
 // newCipher calls the newCipherGeneric function

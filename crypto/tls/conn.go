@@ -11,15 +11,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/mzky/utils/crypto/cipher"
+	"github.com/mzky/utils/crypto/subtle"
+	"github.com/mzky/utils/crypto/x509"
 	"hash"
 	"io"
 	"net"
 	"sync"
 	"sync/atomic"
 	"time"
-	"utils/crypto/cipher"
-	"utils/crypto/subtle"
-	"utils/crypto/x509"
 )
 
 // A Conn represents a secured connection.

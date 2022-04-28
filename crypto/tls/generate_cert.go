@@ -13,19 +13,19 @@ package main
 import (
 	"encoding/pem"
 	"flag"
+	"github.com/mzky/utils/crypto/ecdsa"
+	"github.com/mzky/utils/crypto/ed25519"
+	"github.com/mzky/utils/crypto/elliptic"
+	"github.com/mzky/utils/crypto/rand"
+	"github.com/mzky/utils/crypto/rsa"
+	"github.com/mzky/utils/crypto/x509"
+	"github.com/mzky/utils/crypto/x509/pkix"
 	"log"
 	"math/big"
 	"net"
 	"os"
 	"strings"
 	"time"
-	"utils/crypto/ecdsa"
-	"utils/crypto/ed25519"
-	"utils/crypto/elliptic"
-	"utils/crypto/rand"
-	"utils/crypto/rsa"
-	"utils/crypto/x509"
-	"utils/crypto/x509/pkix"
 )
 
 var (

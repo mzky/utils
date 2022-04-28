@@ -10,15 +10,15 @@ import (
 	"compress/bzip2"
 	"crypto"
 	"encoding/hex"
+	_ "github.com/mzky/utils/crypto/md5"
+	"github.com/mzky/utils/crypto/rand"
+	"github.com/mzky/utils/crypto/sha1"
+	"github.com/mzky/utils/crypto/sha256"
 	"math/big"
 	"os"
 	"strconv"
 	"strings"
 	"testing"
-	_ "utils/crypto/md5"
-	"utils/crypto/rand"
-	"utils/crypto/sha1"
-	"utils/crypto/sha256"
 )
 
 func TestEMSAPSS(t *testing.T) {

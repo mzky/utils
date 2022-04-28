@@ -8,9 +8,9 @@ import (
 	"encoding/asn1"
 	"errors"
 	"fmt"
+	"github.com/mzky/utils/crypto/ecdsa"
+	"github.com/mzky/utils/crypto/elliptic"
 	"math/big"
-	"utils/crypto/ecdsa"
-	"utils/crypto/elliptic"
 )
 
 const ecPrivKeyVersion = 1

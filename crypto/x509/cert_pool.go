@@ -8,9 +8,9 @@ import (
 	"bytes"
 	"encoding/pem"
 	"errors"
+	"github.com/mzky/utils/crypto/sha256"
 	"runtime"
 	"sync"
-	"utils/crypto/sha256"
 )
 
 type sum224 [sha256.Size224]byte
@@ -105,7 +105,7 @@ func (s *CertPool) copy() *CertPool {
 func SystemCertPool() (*CertPool, error) {
 	if runtime.GOOS == "windows" {
 		// Issue 16736, 18609:
-		return nil, errors.New("utils/crypto/x509: system root pool is not available on Windows")
+		return nil, errors.New("github.com/mzky/utils/crypto/x509: system root pool is not available on Windows")
 	}
 
 	if sysRoots := systemRootsPool(); sysRoots != nil {

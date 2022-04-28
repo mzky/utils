@@ -8,11 +8,11 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
+	"github.com/mzky/utils/crypto/aes"
+	"github.com/mzky/utils/crypto/cipher"
+	"github.com/mzky/utils/crypto/rand"
 	"io"
 	"os"
-	"utils/crypto/aes"
-	"utils/crypto/cipher"
-	"utils/crypto/rand"
 )
 
 func ExampleNewGCM_encrypt() {

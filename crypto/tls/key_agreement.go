@@ -8,11 +8,11 @@ import (
 	"crypto"
 	"errors"
 	"fmt"
+	"github.com/mzky/utils/crypto/md5"
+	"github.com/mzky/utils/crypto/rsa"
+	"github.com/mzky/utils/crypto/sha1"
+	"github.com/mzky/utils/crypto/x509"
 	"io"
-	"utils/crypto/md5"
-	"utils/crypto/rsa"
-	"utils/crypto/sha1"
-	"utils/crypto/x509"
 )
 
 // a keyAgreement implements the client and server side of a TLS key agreement

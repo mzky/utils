@@ -13,14 +13,14 @@ package rand
 import (
 	"bufio"
 	"encoding/binary"
+	"github.com/mzky/utils/crypto/aes"
+	"github.com/mzky/utils/crypto/cipher"
 	"io"
 	"os"
 	"runtime"
 	"sync"
 	"sync/atomic"
 	"time"
-	"utils/crypto/aes"
-	"utils/crypto/cipher"
 )
 
 const urandomDevice = "/dev/urandom"
@@ -49,7 +49,7 @@ type devReader struct {
 var altGetRandom func([]byte) (ok bool)
 
 func warnBlocked() {
-	println("utils/crypto/rand: blocked for 60 seconds waiting to read random data from the kernel")
+	println("github.com/mzky/utils/crypto/rand: blocked for 60 seconds waiting to read random data from the kernel")
 }
 
 func (r *devReader) Read(b []byte) (n int, err error) {

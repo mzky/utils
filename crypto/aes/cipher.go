@@ -5,9 +5,9 @@
 package aes
 
 import (
+	"github.com/mzky/utils/crypto/cipher"
+	"github.com/mzky/utils/crypto/internal/subtle"
 	"strconv"
-	"utils/crypto/cipher"
-	"utils/crypto/internal/subtle"
 )
 
 // The AES block size in bytes.
@@ -22,7 +22,7 @@ type aesCipher struct {
 type KeySizeError int
 
 func (k KeySizeError) Error() string {
-	return "utils/crypto/aes: invalid key size " + strconv.Itoa(int(k))
+	return "github.com/mzky/utils/crypto/aes: invalid key size " + strconv.Itoa(int(k))
 }
 
 // NewCipher creates and returns a new cipher.Block.
@@ -53,26 +53,26 @@ func (c *aesCipher) BlockSize() int { return BlockSize }
 
 func (c *aesCipher) Encrypt(dst, src []byte) {
 	if len(src) < BlockSize {
-		panic("utils/crypto/aes: input not full block")
+		panic("github.com/mzky/utils/crypto/aes: input not full block")
 	}
 	if len(dst) < BlockSize {
-		panic("utils/crypto/aes: output not full block")
+		panic("github.com/mzky/utils/crypto/aes: output not full block")
 	}
 	if subtle.InexactOverlap(dst[:BlockSize], src[:BlockSize]) {
-		panic("utils/crypto/aes: invalid buffer overlap")
+		panic("github.com/mzky/utils/crypto/aes: invalid buffer overlap")
 	}
 	encryptBlockGo(c.enc, dst, src)
 }
 
 func (c *aesCipher) Decrypt(dst, src []byte) {
 	if len(src) < BlockSize {
-		panic("utils/crypto/aes: input not full block")
+		panic("github.com/mzky/utils/crypto/aes: input not full block")
 	}
 	if len(dst) < BlockSize {
-		panic("utils/crypto/aes: output not full block")
+		panic("github.com/mzky/utils/crypto/aes: output not full block")
 	}
 	if subtle.InexactOverlap(dst[:BlockSize], src[:BlockSize]) {
-		panic("utils/crypto/aes: invalid buffer overlap")
+		panic("github.com/mzky/utils/crypto/aes: invalid buffer overlap")
 	}
 	decryptBlockGo(c.dec, dst, src)
 }

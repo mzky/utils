@@ -16,11 +16,11 @@ import (
 	"bytes"
 	"crypto"
 	"errors"
+	"github.com/mzky/utils/crypto/ed25519/internal/edwards25519"
+	cryptorand "github.com/mzky/utils/crypto/rand"
+	"github.com/mzky/utils/crypto/sha512"
 	"io"
 	"strconv"
-	"utils/crypto/ed25519/internal/edwards25519"
-	cryptorand "utils/crypto/rand"
-	"utils/crypto/sha512"
 )
 
 const (
