@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"utils/net"
+	"github.com/mzky/utils/net"
 )
 
 func main() {
