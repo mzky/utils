@@ -3,7 +3,7 @@ module github.com/mzky/utils
 go 1.18
 
 require (
-	github.com/bingoohuang/golog v0.0.0-20220419071623-16dcc2aaef54
+	github.com/bingoohuang/golog v0.0.0-20230413033319-0213e2c952ac
 	github.com/mzky/zip v0.0.0-20210817031838-1b692015aed2
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.8.1
@@ -25,9 +25,10 @@ require (
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/yeka/zip v0.0.0-20180914125537-d046722c6feb // indirect
 	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4 // indirect
-	golang.org/x/sys v0.0.0-20220412211240-33da011f77ad // indirect
+	golang.org/x/sys v0.6.0 // indirect
+	golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/ini.v1 v1.66.4 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
