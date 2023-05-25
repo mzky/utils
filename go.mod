@@ -4,12 +4,10 @@ go 1.18
 
 require (
 	github.com/bingoohuang/golog v0.0.0-20230413033319-0213e2c952ac
-	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/mzky/zip v0.0.0-20210817031838-1b692015aed2
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/viper v1.11.0
-	golang.org/x/image v0.0.0-20190802002840-cff245a6509b
 )
 
 require (
@@ -28,8 +26,8 @@ require (
 	github.com/yeka/zip v0.0.0-20180914125537-d046722c6feb // indirect
 	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4 // indirect
 	golang.org/x/sys v0.6.0 // indirect
-	golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1 // indirect
-	golang.org/x/text v0.3.7 // indirect
+	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
+	golang.org/x/text v0.7.0 // indirect
 	gopkg.in/ini.v1 v1.66.4 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
