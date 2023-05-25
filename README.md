@@ -1,13 +1,11 @@
-常用工具库
+captcha：生成验证码
 
-数组操作
+common:常用工具库、数组操作、字符串操作、文件操作、定时操作
 
-字符串操作
+net：网络操作
 
-网络操作
+tls：产生自签ssl证书
 
-文件操作
+encryption：加解密
 
-定时操作
-
-日志模块： https://github.com/bingoohuang/golog
+log：日志模块 https://github.com/bingoohuang/golog

@@ -4,10 +4,12 @@ go 1.18
 
 require (
 	github.com/bingoohuang/golog v0.0.0-20230413033319-0213e2c952ac
+	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/mzky/zip v0.0.0-20210817031838-1b692015aed2
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/viper v1.11.0
+	golang.org/x/image v0.0.0-20190802002840-cff245a6509b
 )
 
 require (
