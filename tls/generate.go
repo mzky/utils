@@ -8,6 +8,7 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/asn1"
+	"encoding/base64"
 	"encoding/pem"
 	"errors"
 	"fmt"
@@ -18,6 +19,7 @@ import (
 	"net/url"
 	"os"
 	"os/user"
+	"software.sslmate.com/src/go-pkcs12"
 	"strings"
 	"time"
 )
@@ -191,7 +193,7 @@ func ReadPrivKey(key []byte) (*rsa.PrivateKey, error) {
 }
 
 // GenerateServer return certPEM, privPEM, nil
-func (c CACert) GenerateServer(hosts []string) ([]byte, []byte, error) {
+func (c *CACert) GenerateServer(hosts []string) ([]byte, []byte, error) {
 	priv, _ := GenerateKey(false)
 	pub := priv.Public()
 
@@ -326,4 +328,15 @@ func hashPublicKey(key *rsa.PublicKey) ([]byte, error) {
 	h := sha1.New()
 	h.Write(b)
 	return h.Sum(nil), nil
+}
+
+func Pkcs12Encode(cert, key []byte, password string) (string, error) {
+	c, _ := ReadRootCert(cert)
+	keyDERBlock, _ := pem.Decode(key)
+	k, _ := x509.ParsePKCS8PrivateKey(keyDERBlock.Bytes)
+	pfx, err := pkcs12.Encode(rand.Reader, k, c, nil, password)
+	if err != nil {
+		return "", fmt.Errorf("pem转换p12证书异常: %v", err)
+	}
+	return base64.StdEncoding.EncodeToString(pfx), nil
 }
