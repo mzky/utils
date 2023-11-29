@@ -12,7 +12,6 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"math/big"
 	"net"
 	"net/mail"
@@ -109,7 +108,7 @@ func GenerateRoot() (*x509.Certificate, *rsa.PrivateKey, error) {
 }
 
 func ReadRootCertFile(filename string) (*x509.Certificate, error) {
-	certPEMBlock, err := ioutil.ReadFile(filename)
+	certPEMBlock, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +124,7 @@ func ReadRootCertFile(filename string) (*x509.Certificate, error) {
 }
 
 //func ReadRootKeyFile(filename string) (interface{}, error) {
-//	keyPEMBlock, err := ioutil.ReadFile(filename)
+//	keyPEMBlock, err := os.ReadFile(filename)
 //	if err != nil {
 //		return nil, err
 //	}
@@ -141,7 +140,7 @@ func ReadRootCertFile(filename string) (*x509.Certificate, error) {
 //}
 
 func CertificateInfo(certPath string) (*x509.Certificate, error) {
-	certFile, err := ioutil.ReadFile(certPath)
+	certFile, err := os.ReadFile(certPath)
 	if err != nil {
 		return nil, errors.New("地址或权限异常") // 创建第一个证书&异常情况创建证书
 	}
@@ -159,7 +158,7 @@ func CertificateInfo(certPath string) (*x509.Certificate, error) {
 }
 
 func ReadPrivKeyFile(filename string) (*rsa.PrivateKey, error) {
-	keyPEMBlock, err := ioutil.ReadFile(filename)
+	keyPEMBlock, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}
@@ -316,7 +315,7 @@ func serialNumber() *big.Int {
 }
 
 func WritePEM(filepath string, pem []byte) error {
-	return ioutil.WriteFile(filepath, pem, 0644)
+	return os.WriteFile(filepath, pem, 0644)
 }
 
 func hashPublicKey(key *rsa.PublicKey) ([]byte, error) {
@@ -334,9 +333,10 @@ func Pkcs12Encode(cert, key []byte, password string) (string, error) {
 	c, _ := ReadRootCert(cert)
 	keyDERBlock, _ := pem.Decode(key)
 	k, _ := x509.ParsePKCS8PrivateKey(keyDERBlock.Bytes)
-	pfx, err := pkcs12.Encode(rand.Reader, k, c, nil, password)
+	var p12 = pkcs12.LegacyRC2
+	pfx, err := p12.Encode(k, c, nil, password)
 	if err != nil {
-		return "", fmt.Errorf("pem转换p12证书异常: %v", err)
+		return "", fmt.Errorf("转换p12证书异常: %v", err)
 	}
 	return base64.StdEncoding.EncodeToString(pfx), nil
 }

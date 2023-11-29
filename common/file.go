@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -13,7 +12,7 @@ import (
 
 // FilesAndDirs 获取指定目录下的所有文件和目录,不包含子目录
 func FilesAndDirs(fp, filter string) (files []string, dirs []string, err error) {
-	dir, err := ioutil.ReadDir(fp)
+	dir, err := os.ReadDir(fp)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -41,7 +40,7 @@ func FilesAndDirs(fp, filter string) (files []string, dirs []string, err error) 
 // FindAllFiles 获取指定目录下的所有文件,包含子目录下的文件
 func FindAllFiles(fp, filter string) (files []string, err error) {
 	var dirs []string
-	dir, err := ioutil.ReadDir(fp)
+	dir, err := os.ReadDir(fp)
 	if err != nil {
 		return nil, err
 	}
@@ -225,7 +224,7 @@ func WriteFile(filePathName, content string) error {
 }
 
 func ReadFile(filePathName string) (string, error) {
-	b, err := ioutil.ReadFile(filePathName)
+	b, err := os.ReadFile(filePathName)
 	if err != nil {
 		return "", errors.New("读取文件失败")
 	}

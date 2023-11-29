@@ -2,7 +2,6 @@ package common
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"regexp"
 	"strings"
@@ -61,7 +60,7 @@ func StringPrefixEqualCount(str1, str2 string) int {
 
 // ReplaceFileContent 使用正则表达式查找模式，并且替换正则1号捕获分组为指定的内容
 func ReplaceFileContent(filename, regexStr, repl string) error {
-	conf, err := ioutil.ReadFile(filename)
+	conf, err := os.ReadFile(filename)
 	if err != nil {
 		return fmt.Errorf("ReadFile %s error %w", filename, err)
 	}
@@ -73,12 +72,12 @@ func ReplaceFileContent(filename, regexStr, repl string) error {
 
 	stat, _ := os.Stat(filename)
 
-	return ioutil.WriteFile(filename, []byte(fixed), stat.Mode())
+	return os.WriteFile(filename, []byte(fixed), stat.Mode())
 }
 
 // ReplaceFileKeywords 字符串替换，并且替换正则1号捕获分组为指定的内容
 func ReplaceFileKeywords(filename, str, repl string) error {
-	conf, err := ioutil.ReadFile(filename)
+	conf, err := os.ReadFile(filename)
 	if err != nil {
 		return fmt.Errorf("ReadFile %s error %w", filename, err)
 	}
@@ -88,12 +87,12 @@ func ReplaceFileKeywords(filename, str, repl string) error {
 
 	stat, _ := os.Stat(filename)
 
-	return ioutil.WriteFile(filename, []byte(newContent), stat.Mode())
+	return os.WriteFile(filename, []byte(newContent), stat.Mode())
 }
 
 // SearchFileContent 使用正则表达式查找模式正则1号捕获分组
 func SearchFileContent(filename, regexStr string) ([]string, error) {
-	conf, err := ioutil.ReadFile(filename)
+	conf, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, fmt.Errorf("ReadFile %s error %w", filename, err)
 	}
@@ -104,7 +103,7 @@ func SearchFileContent(filename, regexStr string) ([]string, error) {
 // SearchPatternLinesInFile 使用正则表达式boundaryRegexStr在文件filename中查找大块，
 // 然后在大块中用captureGroup1Regex中的每行寻找匹配
 func SearchPatternLinesInFile(filename, boundaryRegexStr, captureGroup1Regex string) ([]string, error) {
-	str, err := ioutil.ReadFile(filename)
+	str, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, fmt.Errorf("ReadFile %s error %w", filename, err)
 	}
