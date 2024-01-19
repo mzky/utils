@@ -73,3 +73,21 @@ func AesDecrypt(encrypted, key []byte) ([]byte, error) {
 	origData = PKCS5UnPadding(origData)
 	return origData, nil
 }
+
+/*
+js参考：
+function encrypt(data, keyStr) {
+ const key = CryptoJS.enc.Utf8.parse(keyStr);
+ const encrypted = CryptoJS.AES.encrypt(data, key, {
+   mode: CryptoJS.mode.CBC,
+   padding: CryptoJS.pad.Pkcs7,
+   iv: key
+ });
+ return encrypted.ciphertext.toString(CryptoJS.enc.Hex);
+}
+
+const p = 'test'; // 明文
+const k = 'e2b61f44ee172fc9'; // 密钥，长度为16字节（128位）
+var encrypted = encrypt(p,k);
+console.log("加密后的结果：", encrypted.toString());
+*/
