@@ -4,16 +4,26 @@ package encryption
 import (
 	"bytes"
 	"crypto/aes"
-	"errors"
+	"crypto/cipher"
+	"encoding/hex"
 )
+
+func PKCS5Padding(ciphertext []byte, blockSize int) []byte {
+	padding := blockSize - len(ciphertext)%blockSize
+	pContent := bytes.Repeat([]byte{byte(padding)}, padding)
+	return append(ciphertext, pContent...)
+}
+
+func PKCS5UnPadding(origData []byte) []byte {
+	length := len(origData)
+	unPadding := int(origData[length-1])
+	return origData[:(length - unPadding)]
+}
 
 func EncryptAES(src, key []byte) ([]byte, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
-	}
-	if src == nil {
-		return nil, errors.New("plain content empty")
 	}
 
 	content := PKCS5Padding(src, block.BlockSize())
@@ -36,14 +46,30 @@ func DecryptAES(encrypted, key []byte) ([]byte, error) {
 	return origData, nil
 }
 
-func PKCS5Padding(ciphertext []byte, blockSize int) []byte {
-	padding := blockSize - len(ciphertext)%blockSize
-	pContent := bytes.Repeat([]byte{byte(padding)}, padding)
-	return append(ciphertext, pContent...)
+// AesEncrypt 兼容js的CryptoJS的AES
+func AesEncrypt(origData, key []byte) (string, error) {
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return "", err
+	}
+	origData = PKCS5Padding(origData, len(key))
+	blockMode := cipher.NewCBCEncrypter(block, key) //iv=key
+	encrypted := make([]byte, len(origData))
+	blockMode.CryptBlocks(encrypted, origData)
+
+	return hex.EncodeToString(encrypted), nil
 }
 
-func PKCS5UnPadding(origData []byte) []byte {
-	length := len(origData)
-	unPadding := int(origData[length-1])
-	return origData[:(length - unPadding)]
+// AesDecrypt 兼容js的CryptoJS的AES
+func AesDecrypt(encrypted, key []byte) ([]byte, error) {
+	encrypted, _ = hex.DecodeString(string(encrypted))
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, err
+	}
+	blockMode := cipher.NewCBCDecrypter(block, key)
+	origData := make([]byte, len(encrypted))
+	blockMode.CryptBlocks(origData, encrypted)
+	origData = PKCS5UnPadding(origData)
+	return origData, nil
 }
