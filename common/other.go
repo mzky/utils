@@ -12,7 +12,7 @@ import (
 )
 
 func GetUUID() string {
-	str := fmt.Sprintf("%s", uuid.Must(uuid.NewV4(), nil))
+	str := fmt.Sprintf("%s", uuid.Must(uuid.NewV4()))
 	return str
 }
 
