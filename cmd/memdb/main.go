@@ -29,8 +29,8 @@ func main() {
 	fmt.Println(dbFloat.Get("decimals1", "e"))      // Output: [2.718]
 	fmt.Println(dbFloat.GetList("decimals.pi"))     // Output: [3.14]
 
-	fmt.Println(dbFloat.GetParentKeyList())          //  Output: [decimals decimals1]
-	fmt.Println(dbFloat.GetChildKeyList("decimals")) // Output:  [pi]
+	fmt.Println(dbFloat.GetParentKeys())          //  Output: [decimals decimals1]
+	fmt.Println(dbFloat.GetChildKeys("decimals")) // Output:  [pi]
 
 	// Save data to JSON
 	marshal, err := json.Marshal(dbInt.Data)
@@ -38,8 +38,7 @@ func main() {
 		fmt.Println("Error marshaling data:", err)
 		return
 	}
-	fmt.Println(dbFloat.GetChildKeyList("decimals")) // Output:  [pi]
-	fmt.Println(string(marshal))                     // Output: {"numbers":{"even":[2,4]}}
+	fmt.Println(string(marshal)) // Output: {"numbers":{"even":[2,4]}}
 	err = os.WriteFile("data.json", marshal, 0644)
 	if err != nil {
 		fmt.Println("Error writing file:", err)

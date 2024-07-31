@@ -66,7 +66,7 @@ func (db *MemoryDB[T]) GetList(Key string) SliceOf[T] {
 	return nil
 }
 
-func (db *MemoryDB[T]) GetParentKeyList() []string {
+func (db *MemoryDB[T]) GetParentKeys() []string {
 	db.mu.RLock()
 	defer db.mu.RUnlock()
 
@@ -76,7 +76,7 @@ func (db *MemoryDB[T]) GetParentKeyList() []string {
 	}
 	return list
 }
-func (db *MemoryDB[T]) GetChildKeyList(parentKey string) []string {
+func (db *MemoryDB[T]) GetChildKeys(parentKey string) []string {
 	db.mu.RLock()
 	defer db.mu.RUnlock()
 	if data, ok := db.Data[parentKey]; ok {
