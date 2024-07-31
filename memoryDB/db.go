@@ -1,7 +1,9 @@
 package memoryDB
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 	"reflect"
 	"strings"
 	"sync"
@@ -125,4 +127,15 @@ func (db *MemoryDB[T]) Clear() {
 // GetTypeKey returns a unique identifier for a type.
 func GetTypeKey(t reflect.Type) string {
 	return fmt.Sprintf("%s", t)
+}
+
+func (db *MemoryDB[T]) Save(fileName string) error {
+	db.mu.Lock()
+	defer db.mu.Unlock()
+
+	bytes, err := json.Marshal(db.Data)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(fileName, bytes, 0755)
 }
