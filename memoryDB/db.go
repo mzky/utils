@@ -79,6 +79,7 @@ func (db *MemoryDB[T]) GetParentKeys() []string {
 func (db *MemoryDB[T]) GetChildKeys(parentKey string) []string {
 	db.mu.RLock()
 	defer db.mu.RUnlock()
+
 	if data, ok := db.Data[parentKey]; ok {
 		var list []string
 		for s, _ := range data {
