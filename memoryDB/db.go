@@ -16,8 +16,8 @@ type MemoryDB[T any] struct {
 	mu   sync.RWMutex // Adds read-write lock for concurrent safety
 }
 
-// NewMemoryDB initializes an in-memory database.
-func NewMemoryDB[T any]() *MemoryDB[T] {
+// New initializes an in-memory database.
+func New[T any]() *MemoryDB[T] {
 	return &MemoryDB[T]{
 		Data: make(map[string]map[string]SliceOf[T]),
 	}

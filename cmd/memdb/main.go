@@ -10,9 +10,9 @@ import (
 // 必须Go 1.18以上
 func main() {
 	// Initialize databases for different types
-	dbInt := memoryDB.NewMemoryDB[int]()
-	dbString := memoryDB.NewMemoryDB[string]()
-	dbFloat := memoryDB.NewMemoryDB[float64]()
+	dbInt := memoryDB.New[int]()
+	dbString := memoryDB.New[string]()
+	dbFloat := memoryDB.New[float64]()
 
 	// Append data
 	dbInt.Append("numbers", "even", 2)
