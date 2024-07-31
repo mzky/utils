@@ -3,9 +3,8 @@ module utils/cmd
 go 1.18
 
 require (
-	github.com/mzky/utils v1.3.0
+	github.com/mzky/utils v1.3.7
 	golang.org/x/image v0.0.0-20190802002840-cff245a6509b
-	software.sslmate.com/src/go-pkcs12 v0.4.0
 )
 
 require (
