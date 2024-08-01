@@ -16,6 +16,11 @@ func New() *DB {
 	return &DB{Data: make(map[string]interface{})}
 }
 
+func (db *DB) Append(value interface{}, key ...string) error {
+	k := strings.Join(key, ".")
+	return db.Insert(k, value)
+}
+
 func (db *DB) Insert(key string, value interface{}) error {
 	keys := strings.Split(key, ".")
 	current := db.Data
