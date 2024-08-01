@@ -8,4 +8,6 @@ tls：产生自签ssl证书
 
 encryption：加解密
 
+memdb：内存数据库 支持自定义嵌套结构、反射定义值的type
+
 log：日志模块 https://github.com/bingoohuang/golog

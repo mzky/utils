@@ -2,50 +2,29 @@ package main
 
 import (
 	"fmt"
-	"github.com/mzky/utils/memoryDB"
-	"math/rand"
+	"github.com/mzky/utils/memdb"
+	"log"
 )
 
-// 必须Go 1.18以上
-
-// 生成随机浮点数
-func randomFloat() float64 {
-	return 1 + rand.Float64()*(100-1)
-}
 func main() {
-	// Initialize databases for different types
-	dbInt := memoryDB.New[int]()
-	dbString := memoryDB.New[string]()
-	dbFloat := memoryDB.New[float64]()
+	db := memdb.New()
 
-	// Append data
-	dbInt.Append("numbers.even.a1", 2)
-	dbInt.Set("numbers", "even", "a2", 4)
+	keys := []string{"aa", "key.key2", "key.key2", "key.key2", "k.k2.k3", "k.k2.k3"}
+	values := []interface{}{"1", 123.1, 34.1, 64.1, "v1", "v2"}
 
-	dbString.Append("words.greetings.a1", "hello")
-	dbString.Set("words", "greetings", "a2", "world")
-
-	dbFloat.Append("decimals.pi.a1", 3.14)
-	dbFloat.Set("decimals1", "e", "a2", 2.718)
-
-	// Get data
-	fmt.Println(dbInt.Get("numbers", "even", "a1"))
-	fmt.Println(dbString.Get("words", "greetings", "a2"))
-	fmt.Println(dbFloat.Get("decimals", "pi", "a1"))
-
-	fmt.Println(dbFloat.GetList("decimals.pi.a1"))
-	fmt.Println(dbFloat.GetSeriesList("decimals.pi"))
-	fmt.Println(dbFloat.GetSeries("decimals", "pi"))
-
-	fmt.Println(dbFloat.GetParentKeys())
-	fmt.Println(dbFloat.GetChildKeys("decimals"))
-
-	for i := 0; i < 100; i++ {
-		dbFloat.Append("decimals.pi.a1", randomFloat())
+	for i, key := range keys {
+		if err := db.Insert(key, values[i]); err != nil {
+			log.Printf("Error setting value for key %s: %v", key, err)
+		}
 	}
-	fmt.Println(dbFloat.GetList("decimals.pi.a1"))
-	dbFloat.Save("data.json")
-	var df = memoryDB.New[float64]()
-	df.Load("data.json")
-	fmt.Println(df.Data)
+
+	f, err := db.Get("key.key2")
+	fmt.Println(f, err)
+	s, err := db.Get("k.k2.k3")
+	fmt.Println(s, err)
+
+	fmt.Println(memdb.ToSlice[float64](f))
+	fmt.Println(memdb.ToSlice[string](s))
+
+	db.Save("data.json")
 }

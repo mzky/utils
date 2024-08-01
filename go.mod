@@ -9,6 +9,8 @@ require (
 	github.com/satori/go.uuid v1.2.1-0.20181028125025-b2ce2384e17b
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/viper v1.11.0
+	github.com/tidwall/match v1.1.1
+	github.com/tidwall/pretty v1.2.1
 	golang.org/x/image v0.0.0-20190802002840-cff245a6509b
 	software.sslmate.com/src/go-pkcs12 v0.4.0
 )
