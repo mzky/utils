@@ -33,7 +33,7 @@ func main() {
 	ii := memdb.ToString(b)
 	bb := memdb.ToFloat64(b)
 	aa := memdb.ToString(a)
-	fmt.Println(ss, ii, bb, aa, "===")
+	fmt.Println(ss, ii, bb, aa)
 
 	fmt.Println(db.GetKeys(""))
 	fmt.Println(db.GetKeys("k"))
