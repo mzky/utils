@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"strconv"
 	"strings"
 )
 
@@ -21,6 +22,7 @@ func (db *DB) Append(value interface{}, key ...string) error {
 	return db.Insert(k, value)
 }
 
+// Insert 插入数据 将所有intx、uintx、floatx类型转换为float64类型
 func (db *DB) Insert(key string, value interface{}) error {
 	keys := strings.Split(key, ".")
 	current := db.Data
@@ -28,19 +30,37 @@ func (db *DB) Insert(key string, value interface{}) error {
 		if i == len(keys)-1 {
 			// 最后一个键，需要处理值的追加
 			if existingValue, exists := current[k]; exists {
-				if reflect.TypeOf(existingValue).Kind() == reflect.Slice {
+				switch reflect.TypeOf(existingValue).Kind() {
+				case reflect.Slice:
 					slice := reflect.ValueOf(existingValue)
 					newSlice := reflect.Append(slice, reflect.ValueOf(value))
 					current[k] = newSlice.Interface()
-				} else {
-					// 如果现有值不是切片，将其转换为切片并追加新值
+				case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+					reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
+					reflect.Float32, reflect.Float64:
+					// 如果现有值不是切片，将其转换为切片并追加新值，追加的数据转换为第一个数据类型
 					slice := reflect.MakeSlice(reflect.SliceOf(reflect.TypeOf(existingValue)), 0, 2)
 					slice = reflect.Append(slice, reflect.ValueOf(existingValue))
-					slice = reflect.Append(slice, reflect.ValueOf(value))
+					slice = reflect.Append(slice, reflect.ValueOf(ToFloat64(value)))
 					current[k] = slice.Interface()
+				case reflect.String:
+					// 如果现有值不是切片，将其转换为切片并追加新值，追加的数据转换为第一个数据类型
+					slice := reflect.MakeSlice(reflect.SliceOf(reflect.TypeOf(existingValue)), 0, 2)
+					slice = reflect.Append(slice, reflect.ValueOf(existingValue))
+					slice = reflect.Append(slice, reflect.ValueOf(ToString(value)))
+					current[k] = slice.Interface()
+				default:
+					continue
 				}
 			} else {
 				// 键不存在，直接赋值
+				switch reflect.TypeOf(value).Kind() {
+				case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+					reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
+					reflect.Float32, reflect.Float64:
+					current[k] = ToFloat64(value)
+					continue
+				}
 				current[k] = value
 			}
 		} else {
@@ -83,11 +103,9 @@ func (db *DB) Save(filePath string) error {
 // SliceOf 泛型切片类型
 type SliceOf[T any] []T
 
-// ToSlice T 泛型类型
+// ToSlice 切片的 T 泛型类型
 func ToSlice[T any](iFace interface{}) SliceOf[T] {
 	if iFace == nil {
-		// 对于空 Data 或空接口值，直接返回一个空的目标类型切片，而不是nil，
-		// 更好地区分处理空切片和nil切片的情况
 		return SliceOf[T]{}
 	}
 	v := reflect.ValueOf(iFace)
@@ -97,7 +115,6 @@ func ToSlice[T any](iFace interface{}) SliceOf[T] {
 
 	// 创建目标类型的切片。这里不能预先分配长度为0的切片，因为v.Len()在v.Len()==0时仍会执行。
 	result := make(SliceOf[T], v.Len())
-
 	for i := 0; i < v.Len(); i++ {
 		val := v.Index(i)
 		// 检查类型兼容性
@@ -109,6 +126,35 @@ func ToSlice[T any](iFace interface{}) SliceOf[T] {
 		// 注意，这种方法在类型不匹配时会返回零值，因此前面的类型检查仍然必要。
 		result[i] = val.Convert(reflect.TypeOf((*T)(nil)).Elem()).Interface().(T)
 	}
-
 	return result
+}
+
+// ToFloat64 将interface{}转换为float64类型
+func ToFloat64(iFace interface{}) float64 {
+	v := reflect.ValueOf(iFace)
+	switch v.Kind() {
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return float64(iFace.(int))
+	case reflect.Float32, reflect.Float64:
+		return v.Float()
+	case reflect.String:
+		f, _ := strconv.ParseFloat(iFace.(string), 64)
+		return f
+	default:
+		return 0
+	}
+}
+
+// ToString 将interface{}转换为string类型
+func ToString(iFace interface{}) string {
+	v := reflect.ValueOf(iFace)
+	switch v.Kind() {
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
+		reflect.Float32, reflect.Float64, reflect.String:
+		return fmt.Sprintf("%v", iFace)
+	default:
+		return ""
+	}
 }
