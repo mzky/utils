@@ -35,5 +35,8 @@ func main() {
 	aa := memdb.ToString(a)
 	fmt.Println(ss, ii, bb, aa, "===")
 
+	fmt.Println(db.GetKeys(""))
+	fmt.Println(db.GetKeys("k"))
+	fmt.Println(db.GetKeys("k.k2"))
 	db.Save("data.json")
 }

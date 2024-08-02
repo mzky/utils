@@ -158,3 +158,36 @@ func ToString(iFace interface{}) string {
 		return ""
 	}
 }
+
+func (db *DB) GetMap(key string) map[string]interface{} {
+	current := db.Data
+	if key == "" {
+		return current
+	}
+	if !strings.Contains(key, ".") {
+		return current[key].(map[string]interface{})
+	}
+	keys := strings.Split(key, ".")
+	for _, k := range keys {
+		if val, ok := current[k]; ok {
+			if next, ok := val.(map[string]interface{}); ok {
+				current = next
+			} else {
+				return nil
+			}
+		} else {
+			return nil
+		}
+	}
+
+	return current
+}
+
+// GetKeys 获取db的键值，key支持多级嵌套
+func (db *DB) GetKeys(key string) []string {
+	var keys []string
+	for s, _ := range db.GetMap(key) {
+		keys = append(keys, s)
+	}
+	return keys
+}
