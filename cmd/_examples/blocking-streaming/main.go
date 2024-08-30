@@ -1,6 +1,6 @@
 package main
 
-// This example requires go-cmd v1.2 or newer
+// This _example requires go-cmd v1.2 or newer
 
 import (
 	"fmt"
