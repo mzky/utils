@@ -4,14 +4,13 @@ go 1.20
 
 require (
 	github.com/bingoohuang/golog v0.0.0-20230413033319-0213e2c952ac
-	github.com/go-cmd/cmd v1.4.3
 	github.com/go-test/deep v1.1.1
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/mzky/zip v0.0.0-20210817031838-1b692015aed2
 	github.com/satori/go.uuid v1.2.1-0.20181028125025-b2ce2384e17b
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/viper v1.11.0
-	golang.org/x/image v0.0.0-20190802002840-cff245a6509b
+	golang.org/x/image v0.18.0
 	software.sslmate.com/src/go-pkcs12 v0.4.0
 )
 
@@ -32,7 +31,7 @@ require (
 	golang.org/x/crypto v0.11.0 // indirect
 	golang.org/x/sys v0.10.0 // indirect
 	golang.org/x/term v0.10.0 // indirect
-	golang.org/x/text v0.11.0 // indirect
+	golang.org/x/text v0.16.0 // indirect
 	gopkg.in/ini.v1 v1.66.4 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
