@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/mzky/utils v1.3.7
-	golang.org/x/image v0.0.0-20190802002840-cff245a6509b
+	golang.org/x/image v0.18.0
 )
 
 require (
@@ -12,6 +12,7 @@ require (
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	golang.org/x/crypto v0.11.0 // indirect
 	golang.org/x/sys v0.10.0 // indirect
+	software.sslmate.com/src/go-pkcs12 v0.4.0 // indirect
 )
 
 replace github.com/mzky/utils => ../
