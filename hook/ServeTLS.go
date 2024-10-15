@@ -97,7 +97,8 @@ Cross-Origin-Resource-Policy: Cross-Origin
 Non-Authoritative-Reason: HSTS
 x-xss-protection: 0
 
-<head><meta http-equiv="refresh" content="1;url="%s"></head>`, u.String(), u.String())
+<head><meta http-equiv="refresh" content="1;url="%s"></head>
+`, u.String(), u.String())
 	}
 	return io.WriteString(c.Conn, TlsBadRequest)
 }
