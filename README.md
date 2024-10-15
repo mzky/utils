@@ -12,4 +12,4 @@ memdb：内存数据库 支持自定义嵌套结构、反射定义值的type
 
 log：日志模块 https://github.com/bingoohuang/golog
 
-srv: 同一个端口将http重定向到https，支持自定义返回信息
+hook: 同一个端口将http重定向到https，支持自定义返回信息

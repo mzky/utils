@@ -1,4 +1,4 @@
-package main
+package hook
 
 import (
 	"context"
@@ -15,36 +15,46 @@ import (
 )
 
 var (
-	TlsBadRequestLocation string
-	TlsBadRequest         string
+	TlsBadRequestLocation string // 重定向的路径
+	TlsBadRequest         string // 浏览器返回的错误信息
 )
 
 type wrapConn struct {
 	net.Conn
 }
 
-func ServeTLS(srv *http.Server, l net.Listener, certFile, keyFile string) error {
-	config := &tls.Config{}
-	if !slices.Contains(config.NextProtos, "http/1.1") {
-		config.NextProtos = append(config.NextProtos, "http/1.1")
+type myListener struct {
+	net.Listener
+}
+
+type Server struct {
+	http.Server
+}
+
+func (srv *Server) ServeTLS(certFile, keyFile string) error {
+	addr := srv.Addr
+	if addr == "" {
+		addr = ":http"
+	}
+	ln, err := net.Listen("tcp", addr)
+	if err != nil {
+		return err
+	}
+	tlsListener := tls.NewListener(ln, srv.TLSConfig)
+	if !slices.Contains(srv.TLSConfig.NextProtos, "http/1.1") {
+		srv.TLSConfig.NextProtos = append(srv.TLSConfig.NextProtos, "http/1.1")
 	}
 
-	configHasCert := len(config.Certificates) > 0 || config.GetCertificate != nil || config.GetConfigForClient != nil
+	configHasCert := len(srv.TLSConfig.Certificates) > 0 || srv.TLSConfig.GetCertificate != nil || srv.TLSConfig.GetConfigForClient != nil
 	if !configHasCert || certFile != "" || keyFile != "" {
 		var err error
-		config.Certificates = make([]tls.Certificate, 1)
-		config.Certificates[0], err = tls.LoadX509KeyPair(certFile, keyFile)
+		srv.TLSConfig.Certificates = make([]tls.Certificate, 1)
+		srv.TLSConfig.Certificates[0], err = tls.LoadX509KeyPair(certFile, keyFile)
 		if err != nil {
 			return err
 		}
 	}
-
-	tlsListener := tls.NewListener(l, config)
 	return srv.Serve(&myListener{Listener: tlsListener})
-}
-
-type myListener struct {
-	net.Listener
 }
 
 func (m *myListener) Accept() (net.Conn, error) {
