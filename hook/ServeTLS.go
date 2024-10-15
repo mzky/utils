@@ -41,6 +41,10 @@ func (srv *Server) ServeTLS(certFile, keyFile string) error {
 		return err
 	}
 	tlsListener := tls.NewListener(ln, srv.TLSConfig)
+
+	if srv.TLSConfig == nil {
+		srv.TLSConfig = &tls.Config{}
+	}
 	if !slices.Contains(srv.TLSConfig.NextProtos, "http/1.1") {
 		srv.TLSConfig.NextProtos = append(srv.TLSConfig.NextProtos, "http/1.1")
 	}
