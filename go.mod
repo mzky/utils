@@ -4,7 +4,6 @@ go 1.20
 
 require (
 	github.com/bingoohuang/golog v0.0.0-20230413033319-0213e2c952ac
-	github.com/go-cmd/cmd v1.4.3
 	github.com/go-test/deep v1.1.1
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/mzky/zip v0.0.0-20210817031838-1b692015aed2
