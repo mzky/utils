@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"net/url"
@@ -17,38 +18,37 @@ import (
 )
 
 var (
-	DefaultBadRequest = "HTTP/1.1 302 Found\r\n\r\n<script>location.protocol='https:'</script>\r\n"
-	Code              int
-	HtmlBody          string
-	RedirectPath      = "/"
+	defaultBadRequest = "HTTP/1.1 302 Found\r\n\r\n<script>location.protocol='https:'</script>\r\n"
+	respBody          string
+	redirectPath      = "/"
 	resp              = &http.Response{Proto: "HTTP/1.1", Header: make(http.Header)}
 )
 
 type handshakeFn func(context.Context) error // (*Conn).clientHandshake or serverHandshake
 
-type myListener struct {
+type listener struct {
 	net.Listener
 }
 
 type wrapConn struct {
 	net.Conn
-	response []byte
+	response string
 }
 
-type Server struct {
+type server struct {
 	http.Server
 }
 
-func (srv *Server) ListenAndServeTLS(certFile, keyFile string) error {
+func NewServer(addr string, handler http.Handler) *server {
+	return &server{Server: http.Server{Addr: addr, Handler: handler, TLSConfig: &tls.Config{}}}
+}
+
+func (srv *server) ListenAndServeTLS(certFile, keyFile string) error {
 	ln, err := net.Listen("tcp", srv.Addr)
 	if err != nil {
 		return err
 	}
 	tlsListener := tls.NewListener(ln, srv.TLSConfig)
-
-	if srv.TLSConfig == nil {
-		srv.TLSConfig = &tls.Config{}
-	}
 
 	configHasCert := len(srv.TLSConfig.Certificates) > 0 || srv.TLSConfig.GetCertificate != nil || srv.TLSConfig.GetConfigForClient != nil
 	if !configHasCert || certFile != "" || keyFile != "" {
@@ -59,14 +59,23 @@ func (srv *Server) ListenAndServeTLS(certFile, keyFile string) error {
 			return e
 		}
 	}
-	return srv.Serve(&myListener{Listener: tlsListener})
+	return srv.Serve(&listener{Listener: tlsListener})
 }
-func SetResponse(fn func(r *http.Response)) {
+func (srv *server) SetResponse(body string, fn func(r *http.Response)) {
+	respBody = body
 	fn(resp)
 }
 
+func (srv *server) SetRedirectPath(rp string) {
+	redirectPath = rp
+}
+
+func (srv *server) SetDefaultBadRequest(dbr string) {
+	defaultBadRequest = dbr
+}
+
 // Accept 接受连接并劫持 handshakeFn
-func (m *myListener) Accept() (net.Conn, error) {
+func (m *listener) Accept() (net.Conn, error) {
 	conn, err := m.Listener.Accept()
 	if err != nil {
 		return nil, err
@@ -101,25 +110,26 @@ func interrupt(fn handshakeFn) handshakeFn {
 }
 
 func (c *wrapConn) Write([]byte) (int, error) {
-	if c.response == nil {
-		c.response = c.response2Bytes()
+	if c.response == "" {
+		c.response = c.response2String()
 	}
-	return c.Conn.Write(c.response)
+	return io.WriteString(c.Conn, c.response)
 }
 
 // Response2Bytes 构造 HTTP 响应字符串
-func (c *wrapConn) response2Bytes() []byte {
-	if HtmlBody == "" {
-		return []byte(DefaultBadRequest)
+func (c *wrapConn) response2String() string {
+	if respBody == "" {
+		return defaultBadRequest
 	}
-	u := url.URL{Scheme: "https", Host: c.LocalAddr().String(), Path: RedirectPath}
-	code := IsEmpty(Code, 302)
-	resp.Status = http.StatusText(code)
-	resp.StatusCode = code
+	u := url.URL{Scheme: "https", Host: c.LocalAddr().String(), Path: redirectPath}
+	if resp.StatusCode == 0 {
+		resp.Status = http.StatusText(302)
+		resp.StatusCode = 302
+	}
 	resp.Header.Set("Location", u.String())
 	resp.Header.Set("Date", time.Now().UTC().Format(http.TimeFormat))
-	htmlBody := strings.ReplaceAll(HtmlBody, "%s", u.String())
-	resp.Header.Set("Content-Length", strconv.Itoa(len(htmlBody)))
+	rb := strings.ReplaceAll(respBody, "%s", u.String())
+	resp.Header.Set("Content-Length", strconv.Itoa(len(rb)))
 
 	var buffer bytes.Buffer
 	fmt.Fprintf(&buffer, "%s %d %s\r\n", resp.Proto, resp.StatusCode, resp.Status)
@@ -129,20 +139,7 @@ func (c *wrapConn) response2Bytes() []byte {
 		}
 	}
 	fmt.Fprintf(&buffer, "\r\n")
-	fmt.Fprintf(&buffer, htmlBody)
+	fmt.Fprintf(&buffer, respBody)
 	fmt.Fprintf(&buffer, "\r\n")
-	return buffer.Bytes()
-}
-
-func IsEmpty(value int, def int) int {
-	if value == 0 {
-		return def
-	}
-	return value
-}
-func IsEmptyString(value string, def string) string {
-	if value == "" {
-		return def
-	}
-	return value
+	return buffer.String()
 }
