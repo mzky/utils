@@ -37,18 +37,18 @@ func main() {
 	//	r.Header.Set("Content-Type", "text/html")
 	//})
 
-    // custom response 2
-    //srv.SetRedirectPath("/login.html")
-    //srv.SetResponse("", func(r *http.Response) {
-    //    r.StatusCode = 307
-    //    r.Status = http.StatusText(307)
-    //    r.Header.Set("Timing-Allow-Origin", "*")
-    //    r.Header.Set("Non-Authoritative-Reason", "HSTS") // 这种方式重定向比script快
-    //    r.Header.Set("x-xss-protection", "0")
-    //    r.Header.Set("Cross-Origin-Resource-Policy", "Cross-Origin")
-    //    r.Header.Set("Content-Type", "text/html; charset=utf-8")
-	//    r.Header.Set("Location", "http://192.168.0.188:7569")  // 可选配重定向地址
-    //})
+	// custom response 2
+	//srv.SetRedirectPath("/login.html")
+	//srv.SetResponse("", func(r *http.Response) {
+	//	r.StatusCode = 307
+	//	r.Status = http.StatusText(307)
+	//	r.Header.Set("Timing-Allow-Origin", "*")
+	//	r.Header.Set("Non-Authoritative-Reason", "HSTS") // 这种方式重定向比script快
+	//	r.Header.Set("x-xss-protection", "0")
+	//	r.Header.Set("Cross-Origin-Resource-Policy", "Cross-Origin")
+	//	r.Header.Set("Content-Type", "text/html; charset=utf-8")
+	//	r.Header.Set("Location", "http://192.168.0.188:7569") // 可选配重定向地址
+	//})
 
 	fmt.Println(srv.ListenAndServeTLS("server.pem", "server.key"))
 }
