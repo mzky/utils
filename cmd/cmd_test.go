@@ -186,7 +186,7 @@ func TestCmdNotStarted(t *testing.T) {
 	}
 
 	err := p.Stop()
-	if err != cmd.ErrNotStarted {
+	if !errors.Is(err, cmd.ErrNotStarted) {
 		t.Error(err)
 	}
 }
@@ -1395,7 +1395,7 @@ func TestOptionsBeforeExecButStopped(t *testing.T) {
 	}
 
 	err := p.Stop()
-	if err != cmd.ErrNotStarted {
+	if !errors.Is(err, cmd.ErrNotStarted) {
 		t.Errorf("got err %v, expected cmd.ErrNotStarted", err)
 	}
 	close(called) // unblock BeforeExec func

@@ -47,7 +47,7 @@ func main() {
 	//	r.Header.Set("x-xss-protection", "0")
 	//	r.Header.Set("Cross-Origin-Resource-Policy", "Cross-Origin")
 	//	r.Header.Set("Content-Type", "text/html; charset=utf-8")
-	//	r.Header.Set("Location", "http://192.168.0.188:7569") // 可选配重定向地址
+	//	r.Header.Set("Location", "https://192.168.0.188:7569") // 可选配重定向地址
 	//})
 
 	fmt.Println(srv.ListenAndServeTLS("server.pem", "server.key"))

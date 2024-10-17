@@ -75,8 +75,8 @@ func FindAllFiles(fp, filter string) (files []string, err error) {
 
 // SelfPath 获取当前目录
 func SelfPath() string {
-	path, _ := filepath.Abs(os.Args[0])
-	return path
+	p, _ := filepath.Abs(os.Args[0])
+	return p
 }
 
 // IsExist 判断文件夹或文件是否存在

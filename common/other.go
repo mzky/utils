@@ -84,7 +84,6 @@ func FindLineIndex(ctx, sep string) (int, error) {
 // ConfigViper 读指定位置配置文件
 func ConfigViper(path string) (*viper.Viper, error) {
 	if !FileIsExist(path) {
-		fmt.Errorf("文件 %s 不存在", path)
 		return nil, fmt.Errorf("文件 %s 不存在", path)
 	}
 	v := viper.New()

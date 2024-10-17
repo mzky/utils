@@ -50,7 +50,7 @@ func GetNetworkInfo() ([]ItfNet, error) {
 	return netArray, nil
 }
 
-// If we use bond or team technology
+// GetRealAdapter If we use bond or team technology
 // to use two or more adapters as a virtual one
 // use net.Interface.HardwareAddr will get the same mac address
 // The following code thinking was borrowed from ethtool's source code ethtool.c
@@ -345,7 +345,7 @@ func IsLocalIp(strIp string) error {
 }
 
 // FindBestIPNet 对比ip是与本地同网段
-//find the best one(who is in same network with otherIpAddr)
+// find the best one(who is in same network with otherIpAddr)
 func FindBestIPNet(otherIpAddr string) (ifName string, ipNetwork *net.IPNet, err error) {
 	otherIP := net.ParseIP(otherIpAddr)
 	if otherIP == nil {

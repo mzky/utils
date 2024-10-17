@@ -19,9 +19,9 @@ func Int2Byte(data, len int) (ret []byte) {
 // Byte2Int 从[]byte中读取长度(小端)
 func Byte2Int(data []byte) int {
 	var ret int = 0
-	var len int = len(data)
+	var ln int = len(data)
 	var i uint = 0
-	for i = 0; i < uint(len); i++ {
+	for i = 0; i < uint(ln); i++ {
 		ret = ret | (int(data[i]) << (i * 8))
 	}
 	return ret

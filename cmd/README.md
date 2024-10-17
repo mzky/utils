@@ -55,11 +55,11 @@ func main() {
 That's it, only three methods: `Start`, `Stop`, and `Status`. When possible, it's better to use `go-cmd/Cmd` than `os/exec.Cmd` because `go-cmd/Cmd` provides:
 
 1. Channel-based fire and forget
-1. Real-time stdout and stderr
-1. Real-time status
-1. Complete and consolidated return
-1. Proper process termination
-1. _100%_ test coverage, no race conditions
+2. Real-time stdout and stderr
+3. Real-time status
+4. Complete and consolidated return
+5. Proper process termination
+6. _100%_ test coverage, no race conditions
 
 ### Channel-based fire and forget
 

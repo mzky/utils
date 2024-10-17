@@ -103,7 +103,7 @@ func (data *Data) WriteGIF(w io.Writer, o *gif.Options) error {
 	return gif.Encode(w, data.Img, o)
 }
 
-// 将图像保存为PNG文件
+// WritePNGFile 将图像保存为PNG文件
 func (data *Data) WritePNGFile(fp string) error {
 	f, err := os.Create(fp)
 	if err != nil {
@@ -114,7 +114,7 @@ func (data *Data) WritePNGFile(fp string) error {
 	return png.Encode(f, data.Img)
 }
 
-// 将图像保存为JPG文件
+// WriteJPGFile 将图像保存为JPG文件
 func (data *Data) WriteJPGFile(fp string) error {
 	f, err := os.Create(fp)
 	if err != nil {
@@ -125,7 +125,7 @@ func (data *Data) WriteJPGFile(fp string) error {
 	return jpeg.Encode(f, data.Img, &jpeg.Options{Quality: 75})
 }
 
-// 将图像保存为GIF文件
+// WriteGIFFile 将图像保存为GIF文件
 func (data *Data) WriteGIFFile(fp string) error {
 	f, err := os.Create(fp)
 	if err != nil {
@@ -211,7 +211,7 @@ func NewCustomGenerator(
 }
 
 func drawWithOption(text string, img *image.NRGBA, options *Options) error {
-	draw.Draw(img, img.Bounds(), &image.Uniform{options.BackgroundColor}, image.Point{}, draw.Src)
+	draw.Draw(img, img.Bounds(), &image.Uniform{C: options.BackgroundColor}, image.Point{}, draw.Src)
 	drawNoise(img, options)
 	drawCurves(img, options)
 	return drawText(text, img, options)
@@ -330,10 +330,8 @@ func getLightness(colour color.Color) float64 {
 	if a == 0 {
 		return 1.0
 	}
-	max := maxColor(r, g, b)
-	min := minColor(r, g, b)
 
-	l := (float64(max) + float64(min)) / (2 * 255)
+	l := (float64(maxColor(r, g, b)) + float64(minColor(r, g, b))) / (2 * 255)
 
 	return l
 }

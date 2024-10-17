@@ -7,7 +7,7 @@ type hsva struct {
 	a       uint8
 }
 
-// https://gist.github.com/mjackson/5311256
+// RGBA https://gist.github.com/mjackson/5311256
 func (c hsva) RGBA() (r, g, b, a uint32) {
 	var i = math.Floor(c.h * 6)
 	var f = c.h*6 - i
