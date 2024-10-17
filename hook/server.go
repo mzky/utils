@@ -35,15 +35,15 @@ type wrapConn struct {
 	response string
 }
 
-type server struct {
+type Server struct {
 	http.Server
 }
 
-func NewServer(addr string, handler http.Handler) *server {
-	return &server{Server: http.Server{Addr: addr, Handler: handler, TLSConfig: &tls.Config{}}}
+func NewServer(addr string, handler http.Handler) *Server {
+	return &Server{Server: http.Server{Addr: addr, Handler: handler, TLSConfig: &tls.Config{}}}
 }
 
-func (srv *server) ListenAndServeTLS(certFile, keyFile string) error {
+func (srv *Server) ListenAndServeTLS(certFile, keyFile string) error {
 	ln, err := net.Listen("tcp", srv.Addr)
 	if err != nil {
 		return err
@@ -61,16 +61,16 @@ func (srv *server) ListenAndServeTLS(certFile, keyFile string) error {
 	}
 	return srv.Serve(&listener{Listener: tlsListener})
 }
-func (srv *server) SetResponse(body string, fn func(r *http.Response)) {
+func (srv *Server) SetResponse(body string, fn func(r *http.Response)) {
 	respBody = body
 	fn(resp)
 }
 
-func (srv *server) SetRedirectPath(rp string) {
+func (srv *Server) SetRedirectPath(rp string) {
 	redirectPath = rp
 }
 
-func (srv *server) SetDefaultBadRequest(dbr string) {
+func (srv *Server) SetDefaultBadRequest(dbr string) {
 	defaultBadRequest = dbr
 }
 
@@ -82,14 +82,10 @@ func (m *listener) Accept() (net.Conn, error) {
 	}
 
 	if tl, ok := conn.(*tls.Conn); ok {
-		v := reflect.ValueOf(tl).Elem()       // 获取指向结构体的 Value
-		field := v.FieldByName("handshakeFn") // 使用反射获取字段
-		if !field.IsValid() || field.Kind() != reflect.Func {
-			return nil, fmt.Errorf("handshakeFn field not found or invalid")
-		}
-		ptr := unsafe.Pointer(field.UnsafeAddr()) // 获取字段的地址
-		realPtr := (*handshakeFn)(ptr)            // 转换为字段类型的指针
-		*realPtr = interrupt(*realPtr)            // 替换 handshakeFn
+		v := reflect.ValueOf(tl).Elem()                               // 获取指向结构体的 Value
+		field := v.FieldByName("handshakeFn")                         // 使用反射获取字段
+		realPtr := (*handshakeFn)(unsafe.Pointer(field.UnsafeAddr())) // 获取字段的地址并转换为字段类型的指针
+		*realPtr = interrupt(*realPtr)                                // 替换 handshakeFn
 	}
 
 	return conn, nil
@@ -138,8 +134,6 @@ func (c *wrapConn) response2String() string {
 			fmt.Fprintf(&buffer, "%s: %s\r\n", k, v)
 		}
 	}
-	fmt.Fprintf(&buffer, "\r\n")
-	fmt.Fprintf(&buffer, respBody)
-	fmt.Fprintf(&buffer, "\r\n")
+	fmt.Fprint(&buffer, "\r\n", respBody, "\r\n")
 	return buffer.String()
 }

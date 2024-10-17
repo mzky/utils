@@ -30,13 +30,25 @@ func main() {
 
 	// custom response
 	//srv.SetRedirectPath("/login.html")
-	//srv.SetKeepAlivesEnabled(false)
 	//body := "---- message ----"
 	//srv.SetResponse(body, func(r *http.Response) {
 	//	r.StatusCode = 400
 	//	r.Status = http.StatusText(400)
 	//	r.Header.Set("Content-Type", "text/html")
 	//})
+
+    // custom response 2
+    //srv.SetRedirectPath("/login.html")
+    //body := `<head><meta http-equiv="refresh" content="0;url="%s"></head>`
+    //srv.SetResponse(body, func(r *http.Response) {
+    //    r.StatusCode = 307
+    //    r.Status = http.StatusText(307)
+    //    r.Header.Set("Timing-Allow-Origin", "*")
+    //    r.Header.Set("Non-Authoritative-Reason", "HSTS") // 这种方式重定向比script快
+    //    r.Header.Set("x-xss-protection", "0")
+    //    r.Header.Set("Cross-Origin-Resource-Policy", "Cross-Origin")
+    //    r.Header.Set("Content-Type", "text/html; charset=utf-8")
+    //})
 
 	fmt.Println(srv.ListenAndServeTLS("server.pem", "server.key"))
 }
