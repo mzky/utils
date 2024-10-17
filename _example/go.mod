@@ -9,9 +9,9 @@ require (
 
 require (
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
-	github.com/sirupsen/logrus v1.8.1 // indirect
-	golang.org/x/crypto v0.11.0 // indirect
-	golang.org/x/sys v0.10.0 // indirect
+	github.com/sirupsen/logrus v1.9.3 // indirect
+	golang.org/x/crypto v0.22.0 // indirect
+	golang.org/x/sys v0.19.0 // indirect
 )
 
 replace github.com/mzky/utils => ../

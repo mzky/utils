@@ -39,8 +39,7 @@ func main() {
 
     // custom response 2
     //srv.SetRedirectPath("/login.html")
-    //body := `<head><meta http-equiv="refresh" content="0;url="%s"></head>`
-    //srv.SetResponse(body, func(r *http.Response) {
+    //srv.SetResponse("", func(r *http.Response) {
     //    r.StatusCode = 307
     //    r.Status = http.StatusText(307)
     //    r.Header.Set("Timing-Allow-Origin", "*")
@@ -48,6 +47,7 @@ func main() {
     //    r.Header.Set("x-xss-protection", "0")
     //    r.Header.Set("Cross-Origin-Resource-Policy", "Cross-Origin")
     //    r.Header.Set("Content-Type", "text/html; charset=utf-8")
+	//    r.Header.Set("Location", "http://192.168.0.188:7569")  // 可选配重定向地址
     //})
 
 	fmt.Println(srv.ListenAndServeTLS("server.pem", "server.key"))

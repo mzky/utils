@@ -61,6 +61,7 @@ func (srv *Server) ListenAndServeTLS(certFile, keyFile string) error {
 	}
 	return srv.Serve(&listener{Listener: tlsListener})
 }
+
 func (srv *Server) SetResponse(body string, fn func(r *http.Response)) {
 	respBody = body
 	fn(resp)
@@ -117,12 +118,15 @@ func (c *wrapConn) response2String() string {
 	if respBody == "" && resp.StatusCode == 0 {
 		return defaultBadRequest
 	}
+
 	u := url.URL{Scheme: "https", Host: c.LocalAddr().String(), Path: redirectPath}
 	if resp.StatusCode == 0 {
 		resp.Status = http.StatusText(302)
 		resp.StatusCode = 302
 	}
-	resp.Header.Set("Location", u.String())
+	if resp.Header.Get("Location") == "" {
+		resp.Header.Set("Location", u.String())
+	}
 	resp.Header.Set("Date", time.Now().UTC().Format(http.TimeFormat))
 	rb := strings.ReplaceAll(respBody, "%s", u.String())
 	resp.Header.Set("Content-Length", strconv.Itoa(len(rb)))
