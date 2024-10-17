@@ -114,7 +114,7 @@ func (c *wrapConn) Write([]byte) (int, error) {
 
 // Response2Bytes 构造 HTTP 响应字符串
 func (c *wrapConn) response2String() string {
-	if respBody == "" {
+	if respBody == "" && resp.StatusCode == 0 {
 		return defaultBadRequest
 	}
 	u := url.URL{Scheme: "https", Host: c.LocalAddr().String(), Path: redirectPath}
