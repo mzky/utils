@@ -1,4 +1,4 @@
-module utils
+module github.com/mzky/utils
 
 go 1.20
 
@@ -6,7 +6,6 @@ require (
 	github.com/bingoohuang/golog v0.0.0-20240909041443-283abc3a5ce0
 	github.com/go-test/deep v1.1.1
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
-	github.com/mzky/utils v1.5.8
 	github.com/mzky/zip v0.0.0-20240709011722-16a3ac64cd1d
 	github.com/satori/go.uuid v1.2.1-0.20181028125025-b2ce2384e17b
 	github.com/sirupsen/logrus v1.9.3
