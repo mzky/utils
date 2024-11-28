@@ -80,7 +80,7 @@ func (tm *TickerManager) startTask(task Task) {
 				return
 			}
 			task.fn.Call(task.args)
-		case <-time.After(0):
+		case <-time.After(time.Second): // 避免阻塞
 			if tm.stop {
 				return
 			}
