@@ -19,12 +19,14 @@ type TickerManager struct {
 	IsRunning bool
 	wg        sync.WaitGroup
 	mu        sync.Mutex
+	stop      bool
 }
 
 // NewTickerManager 创建一个新的 TickerManager 实例
 func NewTickerManager() *TickerManager {
 	return &TickerManager{
 		IsRunning: false,
+		stop:      false,
 	}
 }
 
@@ -56,6 +58,7 @@ func (tm *TickerManager) Start() {
 		return
 	}
 	tm.IsRunning = true
+	tm.stop = false
 	tm.mu.Unlock()
 
 	for _, task := range tm.tasks {
@@ -73,7 +76,14 @@ func (tm *TickerManager) startTask(task Task) {
 	for {
 		select {
 		case <-ticker.C:
+			if tm.stop {
+				return
+			}
 			task.fn.Call(task.args)
+		case <-time.After(0):
+			if tm.stop {
+				return
+			}
 		}
 	}
 }
@@ -85,6 +95,7 @@ func (tm *TickerManager) Stop() {
 		tm.mu.Unlock()
 		return
 	}
+	tm.stop = true
 	tm.IsRunning = false
 	tm.mu.Unlock()
 
