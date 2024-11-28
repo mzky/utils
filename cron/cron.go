@@ -16,7 +16,7 @@ type Task struct {
 // TickerManager 管理定时器的启动和停止
 type TickerManager struct {
 	tasks     []Task
-	isRunning bool
+	IsRunning bool
 	wg        sync.WaitGroup
 	mu        sync.Mutex
 }
@@ -24,7 +24,7 @@ type TickerManager struct {
 // NewTickerManager 创建一个新的 TickerManager 实例
 func NewTickerManager() *TickerManager {
 	return &TickerManager{
-		isRunning: false,
+		IsRunning: false,
 	}
 }
 
@@ -51,11 +51,11 @@ func toReflectValues(args []interface{}) []reflect.Value {
 // Start 启动所有定时任务
 func (tm *TickerManager) Start() {
 	tm.mu.Lock()
-	if tm.isRunning {
+	if tm.IsRunning {
 		tm.mu.Unlock()
 		return
 	}
-	tm.isRunning = true
+	tm.IsRunning = true
 	tm.mu.Unlock()
 
 	for _, task := range tm.tasks {
@@ -81,11 +81,11 @@ func (tm *TickerManager) startTask(task Task) {
 // Stop 停止所有定时任务
 func (tm *TickerManager) Stop() {
 	tm.mu.Lock()
-	if !tm.isRunning {
+	if !tm.IsRunning {
 		tm.mu.Unlock()
 		return
 	}
-	tm.isRunning = false
+	tm.IsRunning = false
 	tm.mu.Unlock()
 
 	tm.wg.Wait()
