@@ -1,5 +1,5 @@
 ### 下面两个定时任务库执行过程，修改系统时间会导致cpu使用率暴增或卡住
-https://github.com/go-co-op/gocron
+https://github.com/go-co-op/gocron(v1存在问题，v2可以使用参数进行限制 https://pkg.go.dev/github.com/go-co-op/gocron/v2#WithSingletonMode )
 
 https://github.com/robfig/cron
 
