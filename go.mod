@@ -10,6 +10,7 @@ require (
 	github.com/satori/go.uuid v1.2.1-0.20181028125025-b2ce2384e17b
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/viper v1.19.0
+	github.com/tjfoc/gmsm v1.4.1
 	golang.org/x/image v0.22.0
 	software.sslmate.com/src/go-pkcs12 v0.5.0
 )
