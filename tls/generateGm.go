@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"crypto/x509/pkix"
 	"encoding/pem"
-	"math/big"
 	"os"
 	"time"
 
@@ -15,7 +14,7 @@ import (
 // GenKeyAndCert 生成密钥和证书
 // serial 为证书序列号
 // types 0 为签名证书，1 为加密证书
-func GenKeyAndCert(keyFile, certFile string, serial int64, types int) error {
+func GenKeyAndCert(keyFile, certFile string, types int) error {
 	priv, err := sm2.GenerateKey(rand.Reader)
 	if err != nil {
 		return err
@@ -44,16 +43,16 @@ func GenKeyAndCert(keyFile, certFile string, serial int64, types int) error {
 	}
 
 	tmpl := x509.Certificate{
-		SerialNumber: big.NewInt(serial),
+		SerialNumber: SerialNumber(),
 		Subject: pkix.Name{
 			Organization:       []string{"BJCA"},
 			CommonName:         "Root CA Encryption",
-			OrganizationalUnit: []string{"BJCADevice"},
+			OrganizationalUnit: []string{UserAndHostname()},
 			Country:            []string{"CN"},
 			Locality:           []string{"BeiJing"},
 			Province:           []string{"BeiJing"},
 		},
-		NotBefore:             time.Now(),
+		NotBefore:             time.Now().AddDate(0, -1, 0), // 取当前时间存在与测试机的时效性
 		NotAfter:              time.Now().AddDate(1, 0, 0),
 		KeyUsage:              keyUsage,
 		ExtKeyUsage:           extKeyUsage,

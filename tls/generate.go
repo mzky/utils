@@ -28,7 +28,7 @@ type CACert struct {
 	Key  crypto.PrivateKey
 }
 
-func userAndHostname() string {
+func UserAndHostname() string {
 	var uh string
 	u, err := user.Current()
 	if err == nil {
@@ -72,7 +72,7 @@ func GenerateRoot() (*x509.Certificate, *rsa.PrivateKey, error) {
 	skid := sha1.Sum(spki.SubjectPublicKey.Bytes)
 
 	tpl := &x509.Certificate{
-		SerialNumber: serialNumber(),
+		SerialNumber: SerialNumber(),
 		Subject: pkix.Name{
 			Organization: []string{"BJCA"},
 			CommonName:   "Root CA",
@@ -202,10 +202,10 @@ func (c *CACert) GenerateServer(hosts []string) ([]byte, []byte, error) {
 	}
 
 	tpl := &x509.Certificate{
-		SerialNumber: serialNumber(),
+		SerialNumber: SerialNumber(),
 		Subject: pkix.Name{
 			Organization:       []string{"CertAide"},
-			OrganizationalUnit: []string{userAndHostname()},
+			OrganizationalUnit: []string{UserAndHostname()},
 			Country:            []string{"CN"},
 			Locality:           []string{"BeiJing"},
 			Province:           []string{"BeiJing"}, // S=
@@ -308,7 +308,7 @@ func FormatIp(ipStr string) (string, error) {
 	return ip.String(), nil
 }
 
-func serialNumber() *big.Int {
+func SerialNumber() *big.Int {
 	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
 	sn, _ := rand.Int(rand.Reader, serialNumberLimit)
 	return sn
