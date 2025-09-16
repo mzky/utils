@@ -183,6 +183,9 @@ func ReadRootCert(cert []byte) (*x509.Certificate, error) {
 
 func ReadPrivKey(key []byte) (*rsa.PrivateKey, error) {
 	keyDERBlock, _ := pem.Decode(key)
+	if keyDERBlock == nil {
+		return nil, fmt.Errorf("failed to decode PEM block")
+	}
 	rootKey, err := x509.ParsePKCS1PrivateKey(keyDERBlock.Bytes)
 	if err != nil {
 		return nil, err

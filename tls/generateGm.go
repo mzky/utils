@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"crypto/x509/pkix"
 	"encoding/pem"
+	"errors"
 	"net"
 	"os"
 	"time"
@@ -206,6 +207,24 @@ func (c *GmCACert) GenerateGmCert(keyFile, certFile string, types int) error {
 	defer certOut.Close()
 	pem.Encode(certOut, &pem.Block{Type: "CERTIFICATE", Bytes: certDER})
 	return nil
+}
+
+func GmCertificateInfo(certPath string) (*x509.Certificate, error) {
+	certFile, err := os.ReadFile(certPath)
+	if err != nil {
+		return nil, errors.New("地址或权限异常") // 创建第一个证书&异常情况创建证书
+	}
+
+	pemBlock, _ := pem.Decode(certFile)
+	if pemBlock == nil {
+		return nil, errors.New("证书格式错误")
+	}
+
+	cert, err := x509.ParseCertificate(pemBlock.Bytes)
+	if err != nil {
+		return nil, errors.New("证书解析异常")
+	}
+	return cert, nil
 }
 
 // SaveGmCertAndKey 保存国密证书和密钥到文件

@@ -50,4 +50,8 @@ func main() {
 	fmt.Println("加密证书生成成功: server_enc.key/server_enc.crt")
 
 	fmt.Println("\n所有国密证书生成完成！")
+	ec, _ := tls.GmCertificateInfo("server_enc.crt")
+	fmt.Println("产生证书的有效期截至:", ec.NotAfter.Local().Format("2006-01-02 15:04"))
+	sc, _ := tls.GmCertificateInfo("server_sign.crt")
+	fmt.Println("产生证书的有效期截至:", sc.NotAfter.Local().Format("2006-01-02 15:04"))
 }
