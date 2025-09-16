@@ -1,7 +1,6 @@
 package tls
 
 import (
-	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha1"
@@ -25,7 +24,7 @@ import (
 
 type CACert struct {
 	Cert *x509.Certificate
-	Key  crypto.PrivateKey
+	Key  *rsa.PrivateKey
 }
 
 func UserAndHostname() string {

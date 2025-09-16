@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/mzky/utils/tls"
 )
@@ -30,6 +31,11 @@ func main() {
 		panic(fmt.Errorf("保存根证书失败: %v", err))
 	}
 	fmt.Println("国密根证书已保存: root.key/root.crt")
+
+	keyBytes, _ := os.ReadFile("root.key")
+	certBytes, _ := os.ReadFile("root.crt")
+	rootCert.Cert, _ = tls.ReadGmRootCert(certBytes)
+	rootCert.Key, _ = tls.ReadGmPrivKey(keyBytes)
 
 	// 新功能2：使用根证书生成国密HTTPS签名证书
 	if err := rootCert.GenerateGmCert("server_sign.key", "server_sign.crt", 0); err != nil {

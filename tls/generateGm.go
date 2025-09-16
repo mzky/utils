@@ -120,7 +120,15 @@ func GenKeyAndCert(keyFile, certFile string, types int) error {
 	return nil
 }
 
-// GenerateGmCertFromRoot 使用国密根证书生成子证书
+func ReadGmRootCert(cert []byte) (*x509.Certificate, error) {
+	return x509.ReadCertificateFromPem(cert)
+}
+
+func ReadGmPrivKey(key []byte) (*sm2.PrivateKey, error) {
+	return x509.ReadPrivateKeyFromPem(key, nil)
+}
+
+// GenerateGmCert 使用国密根证书生成子证书
 // types 0 为签名证书，1 为加密证书
 func (c *GmCACert) GenerateGmCert(keyFile, certFile string, types int) error {
 	priv, err := sm2.GenerateKey(rand.Reader)
