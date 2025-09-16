@@ -201,14 +201,14 @@ func (c *GmCACert) GenerateGmCert(keyFile, certFile string, types int) error {
 }
 
 // SaveGmCertAndKey 保存国密证书和密钥到文件
-func SaveGmCertAndKey(cert *x509.Certificate, key *sm2.PrivateKey, certFile, keyFile string) error {
+func (c *GmCACert) SaveGmCertAndKey(certFile, keyFile string) error {
 	// 保存证书
 	certOut, err := os.Create(certFile)
 	if err != nil {
 		return err
 	}
 	defer certOut.Close()
-	pem.Encode(certOut, &pem.Block{Type: "CERTIFICATE", Bytes: cert.Raw})
+	pem.Encode(certOut, &pem.Block{Type: "CERTIFICATE", Bytes: c.Cert.Raw})
 
 	// 保存密钥
 	keyOut, err := os.Create(keyFile)
@@ -216,7 +216,7 @@ func SaveGmCertAndKey(cert *x509.Certificate, key *sm2.PrivateKey, certFile, key
 		return err
 	}
 	defer keyOut.Close()
-	keyBytes, err := x509.WritePrivateKeyToPem(key, nil)
+	keyBytes, err := x509.WritePrivateKeyToPem(c.Key, nil)
 	if err != nil {
 		return err
 	}

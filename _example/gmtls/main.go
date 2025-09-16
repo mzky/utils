@@ -26,7 +26,7 @@ func main() {
 	fmt.Println("国密根证书生成成功")
 
 	// 保存根证书到文件
-	if err := tls.SaveGmCertAndKey(rootCert.Cert, rootCert.Key, "root.crt", "root.key"); err != nil {
+	if err := rootCert.SaveGmCertAndKey("root.crt", "root.key"); err != nil {
 		panic(fmt.Errorf("保存根证书失败: %v", err))
 	}
 	fmt.Println("国密根证书已保存: root.key/root.crt")
