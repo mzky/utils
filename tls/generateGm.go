@@ -6,6 +6,7 @@ import (
 	"encoding/pem"
 	"errors"
 	"net"
+	"net/mail"
 	"os"
 	"time"
 
@@ -64,7 +65,7 @@ func GenerateGmRoot() (*GmCACert, error) {
 
 // GenKeyAndCert 生成密钥和证书
 // types 0 为签名证书，1 为加密证书
-func GenKeyAndCert(keyFile, certFile string, types int) error {
+func GenKeyAndCert(hosts []string, keyFile, certFile string, types int) error {
 	priv, err := sm2.GenerateKey(rand.Reader)
 	if err != nil {
 		return err
@@ -103,11 +104,29 @@ func GenKeyAndCert(keyFile, certFile string, types int) error {
 			Province:           []string{"BeiJing"},
 		},
 		NotBefore:             time.Now().AddDate(0, -1, 0), // 取当前时间存在与测试机的时效性
-		NotAfter:              time.Now().AddDate(1, 0, 0),
+		NotAfter:              time.Now().AddDate(1, -1, 0),
 		KeyUsage:              keyUsage,
 		ExtKeyUsage:           extKeyUsage,
 		BasicConstraintsValid: true,
 	}
+
+	for _, h := range hosts {
+		if ip := net.ParseIP(h); ip != nil {
+			tmpl.IPAddresses = append(tmpl.IPAddresses, ip)
+			if IsIPv4(h) && !IsSameIP(h, "127.0.0.1") && tmpl.Subject.CommonName == "" {
+				tmpl.Subject.CommonName = h
+			}
+		} else if email, err := mail.ParseAddress(h); err == nil && email.Address == h {
+			tmpl.EmailAddresses = append(tmpl.EmailAddresses, h)
+		} else {
+			tmpl.DNSNames = append(tmpl.DNSNames, h)
+		}
+	}
+
+	if tmpl.Subject.CommonName == "" {
+		tmpl.Subject.CommonName = hosts[0]
+	}
+
 	certDER, err := x509.CreateCertificate(&tmpl, &tmpl, &priv.PublicKey, priv)
 	if err != nil {
 		return err

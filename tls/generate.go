@@ -203,7 +203,7 @@ func (c *CACert) GenerateServer(hosts []string) ([]byte, []byte, error) {
 		return nil, nil, err
 	}
 
-	tpl := &x509.Certificate{
+	tmpl := &x509.Certificate{
 		SerialNumber: SerialNumber(),
 		Subject: pkix.Name{
 			Organization:       []string{"CertAide"},
@@ -225,25 +225,25 @@ func (c *CACert) GenerateServer(hosts []string) ([]byte, []byte, error) {
 
 	for _, h := range hosts {
 		if ip := net.ParseIP(h); ip != nil {
-			tpl.IPAddresses = append(tpl.IPAddresses, ip)
-			if IsIPv4(h) && !IsSameIP(h, "127.0.0.1") && tpl.Subject.CommonName == "" {
+			tmpl.IPAddresses = append(tmpl.IPAddresses, ip)
+			if IsIPv4(h) && !IsSameIP(h, "127.0.0.1") && tmpl.Subject.CommonName == "" {
 				// IIS (the main target of PKCS #12 files), only shows the deprecated
 				// Common Name in the UI. See issue #115.
-				tpl.Subject.CommonName = h
+				tmpl.Subject.CommonName = h
 			}
 		} else if email, err := mail.ParseAddress(h); err == nil && email.Address == h {
-			tpl.EmailAddresses = append(tpl.EmailAddresses, h)
+			tmpl.EmailAddresses = append(tmpl.EmailAddresses, h)
 		} else if uriName, err := url.Parse(h); err == nil && uriName.Scheme != "" && uriName.Host != "" {
-			tpl.URIs = append(tpl.URIs, uriName)
+			tmpl.URIs = append(tmpl.URIs, uriName)
 		} else {
-			tpl.DNSNames = append(tpl.DNSNames, h)
+			tmpl.DNSNames = append(tmpl.DNSNames, h)
 		}
 	}
 
-	if tpl.Subject.CommonName == "" {
-		tpl.Subject.CommonName = hosts[0]
+	if tmpl.Subject.CommonName == "" {
+		tmpl.Subject.CommonName = hosts[0]
 	}
-	cert, err := x509.CreateCertificate(rand.Reader, tpl, c.Cert, pub, c.Key)
+	cert, err := x509.CreateCertificate(rand.Reader, tmpl, c.Cert, pub, c.Key)
 	if err != nil {
 		return nil, nil, err
 	}

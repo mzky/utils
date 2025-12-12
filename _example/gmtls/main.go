@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/mzky/utils/net"
 	"os"
 
 	"github.com/mzky/utils/tls"
@@ -9,11 +10,15 @@ import (
 
 func main() {
 	fmt.Println("=== 原有功能：直接生成自签名国密证书 ===")
+	// 配置可信地址方法一：手动配置
+	ipArray := []string{"127.0.0.1"}
+	// 配置可信地址方法二：自动获取本地IP
+	ipArray, _ = net.GetLocalIPList()
 	// 原有功能：直接生成自签名国密证书
-	if err := tls.GenKeyAndCert("sign.key", "sign.crt", 0); err != nil {
+	if err := tls.GenKeyAndCert(ipArray, "sign.key", "sign.crt", 0); err != nil {
 		panic(err)
 	}
-	if err := tls.GenKeyAndCert("enc.key", "enc.crt", 1); err != nil {
+	if err := tls.GenKeyAndCert(ipArray, "enc.key", "enc.crt", 1); err != nil {
 		panic(err)
 	}
 	fmt.Println("自签名国密证书生成成功: sign.key/sign.crt, enc.key/enc.crt")
