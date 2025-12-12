@@ -197,7 +197,7 @@ func (c *GmCACert) GenerateGmCert(keyFile, certFile string, types int) error {
 			Province:           []string{"BeiJing"},
 		},
 		NotBefore:             time.Now().AddDate(0, -1, 0),
-		NotAfter:              time.Now().AddDate(1, 0, 0),
+		NotAfter:              time.Now().AddDate(1, -1, 0),
 		KeyUsage:              keyUsage,
 		ExtKeyUsage:           extKeyUsage,
 		BasicConstraintsValid: true,
