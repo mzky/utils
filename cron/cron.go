@@ -101,3 +101,10 @@ func (tm *TickerManager) Stop() {
 
 	tm.wg.Wait()
 }
+
+// ClearTasks 清空所有任务
+func (tm *TickerManager) ClearTasks() {
+	tm.mu.Lock()
+	defer tm.mu.Unlock()
+	tm.tasks = []Task{}
+}
