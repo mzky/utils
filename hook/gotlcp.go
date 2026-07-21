@@ -14,46 +14,10 @@ import (
 	"gitee.com/Trisia/gotlcp/tlcp"
 )
 
-func loadConfigs(mode, certFile, keyFile, signCert, signKey, encCert, encKey string) (*tls.Config, *tlcp.Config, error) {
-	var tlsConfig *tls.Config
-	if mode == "tls" || mode == "auto" {
-		cert, err := tls.LoadX509KeyPair(certFile, keyFile)
-		if err != nil {
-			return nil, nil, fmt.Errorf("加载标准 TLS 证书: %w", err)
-		}
-		tlsConfig = &tls.Config{
-			MinVersion:   tls.VersionTLS12,
-			NextProtos:   []string{"http/1.1"},
-			Certificates: []tls.Certificate{cert},
-		}
-	}
-
-	var tlcpConfig *tlcp.Config
-	if mode == "tlcp" || mode == "gm" || mode == "auto" {
-		sign, err := tlcp.LoadX509KeyPair(signCert, signKey)
-		if err != nil {
-			return nil, nil, fmt.Errorf("加载 TLCP 签名证书: %w", err)
-		}
-		enc, err := tlcp.LoadX509KeyPair(encCert, encKey)
-		if err != nil {
-			return nil, nil, fmt.Errorf("加载 TLCP 加密证书: %w", err)
-		}
-		tlcpConfig = &tlcp.Config{Certificates: []tlcp.Certificate{sign, enc}}
-	}
-
-	return tlsConfig, tlcpConfig, nil
-}
-
-func displayHTTPSURL(addr string) string {
-	host, port, err := net.SplitHostPort(addr)
-	if err != nil {
-		return "https://" + addr
-	}
-	if host == "" || host == "0.0.0.0" || host == "::" {
-		host = "localhost"
-	}
-	return "https://" + net.JoinHostPort(host, port)
-}
+var (
+	TlsConfig  *tls.Config
+	TlcpConfig *tlcp.Config
+)
 
 type httpRedirectListener struct {
 	net.Listener
@@ -76,10 +40,9 @@ func (l *httpRedirectListener) Accept() (net.Conn, error) {
 
 type httpRedirectConn struct {
 	net.Conn
-	reader     *bufio.Reader
-	once       sync.Once
-	redirected bool
-	readErr    error
+	reader  *bufio.Reader
+	once    sync.Once
+	readErr error
 }
 
 func (c *httpRedirectConn) Read(p []byte) (int, error) {
@@ -90,16 +53,12 @@ func (c *httpRedirectConn) Read(p []byte) (int, error) {
 			return
 		}
 		if first[0] >= 'A' && first[0] <= 'Z' {
-			c.redirected = true
 			c.readErr = c.redirectHTTP()
 		}
 	})
 
-	if c.redirected || c.readErr != nil {
-		if c.readErr != nil {
-			return 0, c.readErr
-		}
-		return 0, io.EOF
+	if c.readErr != nil {
+		return 0, c.readErr
 	}
 	return c.reader.Read(p)
 }
@@ -137,10 +96,6 @@ func (c *httpRedirectConn) redirectHTTP() error {
 	return io.EOF
 }
 
-func (c *httpRedirectConn) Close() error {
-	return c.Conn.Close()
-}
-
 func BuildListener(mode, addr, certFile, keyFile, signCert, signKey, encCert, encKey string) (net.Listener, error) {
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -148,21 +103,38 @@ func BuildListener(mode, addr, certFile, keyFile, signCert, signKey, encCert, en
 	}
 
 	ln = newHTTPRedirectListener(ln)
+	if mode == "tls" || mode == "auto" {
+		cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+		if err != nil {
+			return nil, fmt.Errorf("加载标准 TLS 证书: %w", err)
+		}
+		TlsConfig = &tls.Config{
+			NextProtos:   []string{"http/1.1"},
+			Certificates: []tls.Certificate{cert},
+		}
+	}
 
-	tlsConfig, tlcpConfig, err := loadConfigs(mode, certFile, keyFile, signCert, signKey, encCert, encKey)
-	if err != nil {
-		return nil, err
+	if mode == "tlcp" || mode == "gm" || mode == "auto" {
+		sign, err := tlcp.LoadX509KeyPair(signCert, signKey)
+		if err != nil {
+			return nil, fmt.Errorf("加载 TLCP 签名证书: %w", err)
+		}
+		enc, err := tlcp.LoadX509KeyPair(encCert, encKey)
+		if err != nil {
+			return nil, fmt.Errorf("加载 TLCP 加密证书: %w", err)
+		}
+		TlcpConfig = &tlcp.Config{Certificates: []tlcp.Certificate{sign, enc}}
 	}
 
 	switch mode {
 	case "tls", "rsa":
-		ln = tls.NewListener(ln, tlsConfig)
+		ln = tls.NewListener(ln, TlsConfig)
 	case "tlcp", "gm":
-		ln = tlcp.NewListener(ln, tlcpConfig)
+		ln = tlcp.NewListener(ln, TlcpConfig)
 	case "auto":
-		ln = pa.NewListener(ln, tlcpConfig, tlsConfig)
+		ln = pa.NewListener(ln, TlcpConfig, TlsConfig)
 	default:
-		return nil, fmt.Errorf("不支持的模式 %q，可选值为 tls、tlcp(gm)、auto", mode)
+		return nil, fmt.Errorf("不支持的模式 %q，可选值为 tls(rsa)、tlcp(gm)、auto", mode)
 	}
 
 	return ln, nil
