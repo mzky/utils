@@ -76,21 +76,8 @@ func main() {
 			},
 		}
 		hook.TlcpConfig = &tlcp.Config{
-			InsecureSkipVerify: true,
-			CipherSuites: []uint16{
-				tls.TLS_AES_128_GCM_SHA256,
-				tls.TLS_AES_256_GCM_SHA384,
-				tls.TLS_CHACHA20_POLY1305_SHA256,
-				tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-				tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-				tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
-				tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
-				// 保留最基础的国密加密套件
-				gmtls.GMTLS_ECDHE_SM2_WITH_SM4_SM3,
-				gmtls.GMTLS_SM2_WITH_SM4_SM3,
-			},
-		}
-
+            InsecureSkipVerify: true,
+        }
 		ln, err := hook.BuildListener(
             k.Config.TlsMode, // tlsMode包含gm，rsa可以指定算法和auto自动算法
 			k.Config.ListenAddr,
