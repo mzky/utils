@@ -2,7 +2,6 @@ package hook
 
 import (
 	"bufio"
-	"crypto/tls"
 	"fmt"
 	"log"
 	"net"
@@ -16,30 +15,37 @@ import (
 	"github.com/tjfoc/gmsm/gmtls"
 )
 
-func BuildTLSConfig(mode, sm2SignCert, sm2SignKey, sm2EncCert, sm2EncKey, stdCert, stdKey string) (*gmtls.Config, error) {
+type ProtocolDetector struct {
+	TLSConfig *gmtls.Config
+	Handler   http.Handler
+}
+
+func (pd *ProtocolDetector) BuildTLSConfig(mode, sm2SignCert, sm2SignKey, sm2EncCert, sm2EncKey, stdCert, stdKey string) (*gmtls.Config, error) {
 	switch mode {
-	case "gm":
-		return buildGMOnlyConfig(sm2SignCert, sm2SignKey, sm2EncCert, sm2EncKey)
-	case "std", "rsa":
-		return buildStdOnlyConfig(stdCert, stdKey)
+	case "gm", "tlcp", "gmtls":
+		return pd.buildGMOnlyConfig(sm2SignCert, sm2SignKey, sm2EncCert, sm2EncKey)
+	case "std", "rsa", "tls":
+		return pd.buildStdOnlyConfig(stdCert, stdKey)
+	case "auto":
+		return pd.buildAutoSwitchConfig(sm2SignCert, sm2SignKey, sm2EncCert, sm2EncKey, stdCert, stdKey)
 	default:
-		return buildAutoSwitchConfig(sm2SignCert, sm2SignKey, sm2EncCert, sm2EncKey, stdCert, stdKey)
+		return nil, fmt.Errorf("不支持的模式 %q，可选值为 tls(rsa)、tlcp(gm)、auto", mode)
 	}
 }
 
-func buildAutoSwitchConfig(sm2SignCert, sm2SignKey, sm2EncCert, sm2EncKey, stdCert, stdKey string) (*gmtls.Config, error) {
+func (pd *ProtocolDetector) buildAutoSwitchConfig(sm2SignCert, sm2SignKey, sm2EncCert, sm2EncKey, stdCert, stdKey string) (*gmtls.Config, error) {
 	log.Println("TLS Mode: Auto Switch (GM + Standard)")
 
 	sigCert, err := gmtls.LoadX509KeyPair(sm2SignCert, sm2SignKey)
 	if err != nil {
 		log.Printf("Warning: Failed to load SM2 sign certificate: %v", err)
-		return buildStdOnlyConfig(stdCert, stdKey)
+		return pd.buildStdOnlyConfig(stdCert, stdKey)
 	}
 
 	encCert, err := gmtls.LoadX509KeyPair(sm2EncCert, sm2EncKey)
 	if err != nil {
 		log.Printf("Warning: Failed to load SM2 encrypt certificate: %v", err)
-		return buildStdOnlyConfig(stdCert, stdKey)
+		return pd.buildStdOnlyConfig(stdCert, stdKey)
 	}
 
 	var stdCertPtr *gmtls.Certificate
@@ -60,7 +66,7 @@ func buildAutoSwitchConfig(sm2SignCert, sm2SignKey, sm2EncCert, sm2EncKey, stdCe
 	return config, nil
 }
 
-func buildGMOnlyConfig(sm2SignCert, sm2SignKey, sm2EncCert, sm2EncKey string) (*gmtls.Config, error) {
+func (pd *ProtocolDetector) buildGMOnlyConfig(sm2SignCert, sm2SignKey, sm2EncCert, sm2EncKey string) (*gmtls.Config, error) {
 	log.Println("TLS Mode: GM Only")
 
 	sigCert, err := gmtls.LoadX509KeyPair(sm2SignCert, sm2SignKey)
@@ -73,39 +79,22 @@ func buildGMOnlyConfig(sm2SignCert, sm2SignKey, sm2EncCert, sm2EncKey string) (*
 		return nil, err
 	}
 
-	config := &gmtls.Config{
-		GMSupport:    &gmtls.GMSupport{},
-		Certificates: []gmtls.Certificate{sigCert, encCert},
-	}
+	pd.TLSConfig.GMSupport = &gmtls.GMSupport{}
+	pd.TLSConfig.Certificates = []gmtls.Certificate{sigCert, encCert}
 
-	return config, nil
+	return pd.TLSConfig, nil
 }
 
-func buildStdOnlyConfig(stdCert, stdKey string) (*gmtls.Config, error) {
+func (pd *ProtocolDetector) buildStdOnlyConfig(stdCert, stdKey string) (*gmtls.Config, error) {
 	log.Println("TLS Mode: Standard Only")
 
 	cert, err := gmtls.LoadX509KeyPair(stdCert, stdKey)
 	if err != nil {
 		return nil, err
 	}
+	pd.TLSConfig.Certificates = []gmtls.Certificate{cert}
 
-	config := &gmtls.Config{
-		Certificates: []gmtls.Certificate{cert},
-		CipherSuites: []uint16{
-			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-			tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-		},
-		MinVersion: tls.VersionTLS12,
-	}
-
-	return config, nil
-}
-
-type ProtocolDetector struct {
-	TLSConfig *gmtls.Config
-	Handler   http.Handler
+	return pd.TLSConfig, nil
 }
 
 func ListenAndServe(addr string, tlsConfig *gmtls.Config, handler http.Handler) error {

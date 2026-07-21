@@ -121,19 +121,43 @@ func main() {
 package main
 
 import (
+	"crypto/tls"
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/tjfoc/gmsm/gmtls"
 
 	"autotls/handler"
-	"autotls/server"
+	"autotls/hook"
 )
 
 func main() {
 	log.Println("Starting GM/TLS HTTP/HTTPS Service...")
+	r := gin.Default()
+	pd := &hook.ProtocolDetector{
+		Handler: r,
+		TLSConfig: &gmtls.Config{
+			InsecureSkipVerify:       true,
+			PreferServerCipherSuites: true,
+			CipherSuites: []uint16{
+				tls.TLS_AES_128_GCM_SHA256,
+				tls.TLS_AES_256_GCM_SHA384,
+				tls.TLS_CHACHA20_POLY1305_SHA256,
+				tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+				tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+				tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
+				tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
+				// 保留最基础的国密加密套件
+				gmtls.GMTLS_ECDHE_SM2_WITH_SM4_SM3,
+				gmtls.GMTLS_SM2_WITH_SM4_SM3,
+			},
+			MinVersion: gmtls.VersionGMSSL,
+			MaxVersion: tls.VersionTLS13,
+		},
+	}
 
-	tlsConfig, err := server.BuildTLSConfig(
-		"auto", // tlsMode包含gm，rsa可以指定算法和auto自动算法
+	tlsConfig, err := pd.BuildTLSConfig(
+		"auto",
 		"./certs/server_sign.crt",
 		"./certs/server_sign.key",
 		"./certs/server_enc.crt",
@@ -145,11 +169,10 @@ func main() {
 		log.Fatalf("Failed to build TLS config: %v", err)
 	}
 
-	r := gin.Default()
 	r.GET("/", handler.Index)
 	r.GET("/health", handler.HealthCheck)
 
-	if err := server.ListenAndServe(":7569", tlsConfig, r); err != nil {
+	if err := hook.ListenAndServe(":7569", tlsConfig, r); err != nil {
 		log.Fatalf("Server error: %v", err)
 	}
 }
