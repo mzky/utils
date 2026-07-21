@@ -1,8 +1,9 @@
 module github.com/mzky/utils
 
-go 1.23.0
+go 1.25.0
 
 require (
+	gitee.com/Trisia/gotlcp v1.5.0
 	github.com/bingoohuang/golog v0.0.0-20240909041443-283abc3a5ce0
 	github.com/gin-gonic/gin v1.10.1
 	github.com/go-test/deep v1.1.1
@@ -21,6 +22,7 @@ require (
 	github.com/bytedance/sonic v1.14.0 // indirect
 	github.com/bytedance/sonic/loader v0.3.0 // indirect
 	github.com/cloudwego/base64x v0.1.6 // indirect
+	github.com/emmansun/gmsm v0.44.0 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.9 // indirect
 	github.com/gin-contrib/sse v1.1.0 // indirect
@@ -47,11 +49,11 @@ require (
 	github.com/ugorji/go/codec v1.3.0 // indirect
 	github.com/yeka/zip v0.0.0-20231116150916-03d6312748a9 // indirect
 	golang.org/x/arch v0.19.0 // indirect
-	golang.org/x/crypto v0.40.0 // indirect
-	golang.org/x/net v0.42.0 // indirect
-	golang.org/x/sys v0.34.0 // indirect
-	golang.org/x/term v0.33.0 // indirect
-	golang.org/x/text v0.27.0 // indirect
+	golang.org/x/crypto v0.53.0 // indirect
+	golang.org/x/net v0.55.0 // indirect
+	golang.org/x/sys v0.46.0 // indirect
+	golang.org/x/term v0.44.0 // indirect
+	golang.org/x/text v0.38.0 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
