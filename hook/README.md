@@ -1,7 +1,7 @@
 
 
 
-// RSA算法例子
+// RSA算法例子,调用server.go
 
 ```go
 package main
@@ -55,7 +55,7 @@ func main() {
 ```
 
 
-// 国密算法示例
+// 国密算法示例，调用gotlcp.go
 ```
 // 指定tls版本和算法，剔除不安全的算法(漏扫原因)
 		hook.TlsConfig = &tls.Config{
@@ -114,4 +114,43 @@ func main() {
 		if e := server.Serve(ln); e != nil && !errors.Is(e, http.ErrServerClosed) {
 			logrus.Fatalf("启动失败,查看端口是否被占用: %v", e)
 		}
+```
+
+// 国密算法示例，调用gmtls.go
+```
+package main
+
+import (
+	"log"
+
+	"github.com/gin-gonic/gin"
+
+	"autotls/handler"
+	"autotls/server"
+)
+
+func main() {
+	log.Println("Starting GM/TLS HTTP/HTTPS Service...")
+
+	tlsConfig, err := server.BuildTLSConfig(
+		"auto", // tlsMode包含gm，rsa可以指定算法和auto自动算法
+		"./certs/server_sign.crt",
+		"./certs/server_sign.key",
+		"./certs/server_enc.crt",
+		"./certs/server_enc.key",
+		"./certs/server_std.crt",
+		"./certs/server_std.key",
+	)
+	if err != nil {
+		log.Fatalf("Failed to build TLS config: %v", err)
+	}
+
+	r := gin.Default()
+	r.GET("/", handler.Index)
+	r.GET("/health", handler.HealthCheck)
+
+	if err := server.ListenAndServe(":7569", tlsConfig, r); err != nil {
+		log.Fatalf("Server error: %v", err)
+	}
+}
 ```

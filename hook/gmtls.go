@@ -2,18 +2,141 @@ package hook
 
 import (
 	"bufio"
+	"crypto/tls"
 	"fmt"
+	"log"
 	"net"
 	"net/http"
+	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/tjfoc/gmsm/gmtls"
 )
 
+func BuildTLSConfig(mode, sm2SignCert, sm2SignKey, sm2EncCert, sm2EncKey, stdCert, stdKey string) (*gmtls.Config, error) {
+	switch mode {
+	case "gm":
+		return buildGMOnlyConfig(sm2SignCert, sm2SignKey, sm2EncCert, sm2EncKey)
+	case "std", "rsa":
+		return buildStdOnlyConfig(stdCert, stdKey)
+	default:
+		return buildAutoSwitchConfig(sm2SignCert, sm2SignKey, sm2EncCert, sm2EncKey, stdCert, stdKey)
+	}
+}
+
+func buildAutoSwitchConfig(sm2SignCert, sm2SignKey, sm2EncCert, sm2EncKey, stdCert, stdKey string) (*gmtls.Config, error) {
+	log.Println("TLS Mode: Auto Switch (GM + Standard)")
+
+	sigCert, err := gmtls.LoadX509KeyPair(sm2SignCert, sm2SignKey)
+	if err != nil {
+		log.Printf("Warning: Failed to load SM2 sign certificate: %v", err)
+		return buildStdOnlyConfig(stdCert, stdKey)
+	}
+
+	encCert, err := gmtls.LoadX509KeyPair(sm2EncCert, sm2EncKey)
+	if err != nil {
+		log.Printf("Warning: Failed to load SM2 encrypt certificate: %v", err)
+		return buildStdOnlyConfig(stdCert, stdKey)
+	}
+
+	var stdCertPtr *gmtls.Certificate
+	if stdCert != "" && stdKey != "" {
+		cert, err := gmtls.LoadX509KeyPair(stdCert, stdKey)
+		if err != nil {
+			log.Printf("Warning: Failed to load standard certificate: %v", err)
+		} else {
+			stdCertPtr = &cert
+		}
+	}
+
+	config, err := gmtls.NewBasicAutoSwitchConfig(&sigCert, &encCert, stdCertPtr)
+	if err != nil {
+		return nil, err
+	}
+
+	return config, nil
+}
+
+func buildGMOnlyConfig(sm2SignCert, sm2SignKey, sm2EncCert, sm2EncKey string) (*gmtls.Config, error) {
+	log.Println("TLS Mode: GM Only")
+
+	sigCert, err := gmtls.LoadX509KeyPair(sm2SignCert, sm2SignKey)
+	if err != nil {
+		return nil, err
+	}
+
+	encCert, err := gmtls.LoadX509KeyPair(sm2EncCert, sm2EncKey)
+	if err != nil {
+		return nil, err
+	}
+
+	config := &gmtls.Config{
+		GMSupport:    &gmtls.GMSupport{},
+		Certificates: []gmtls.Certificate{sigCert, encCert},
+	}
+
+	return config, nil
+}
+
+func buildStdOnlyConfig(stdCert, stdKey string) (*gmtls.Config, error) {
+	log.Println("TLS Mode: Standard Only")
+
+	cert, err := gmtls.LoadX509KeyPair(stdCert, stdKey)
+	if err != nil {
+		return nil, err
+	}
+
+	config := &gmtls.Config{
+		Certificates: []gmtls.Certificate{cert},
+		CipherSuites: []uint16{
+			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+			tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+		},
+		MinVersion: tls.VersionTLS12,
+	}
+
+	return config, nil
+}
+
 type ProtocolDetector struct {
 	TLSConfig *gmtls.Config
 	Handler   http.Handler
+}
+
+func ListenAndServe(addr string, tlsConfig *gmtls.Config, handler http.Handler) error {
+	listener, err := net.Listen("tcp", addr)
+	if err != nil {
+		return fmt.Errorf("failed to create listener: %w", err)
+	}
+	log.Printf("Server starting on %s", addr)
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		<-quit
+		log.Println("Shutting down server...")
+		listener.Close()
+	}()
+
+	detector := &ProtocolDetector{
+		TLSConfig: tlsConfig,
+		Handler:   handler,
+	}
+
+	for {
+		conn, err := listener.Accept()
+		if err != nil {
+			log.Printf("Accept error: %v", err)
+			return nil
+		}
+		go detector.HandleConnection(conn)
+	}
 }
 
 func (pd *ProtocolDetector) HandleConnection(conn net.Conn) {
@@ -43,7 +166,7 @@ func (pd *ProtocolDetector) HandleConnection(conn net.Conn) {
 			}
 			pd.Handler.ServeHTTP(w, req)
 			w.WriteHeaderIfNotWritten()
-			w.Flush()
+			w.WriteResponse()
 			if req.Close {
 				break
 			}
@@ -127,7 +250,7 @@ func (w *responseWriter) WriteHeaderIfNotWritten() {
 	}
 }
 
-func (w *responseWriter) Flush() {
+func (w *responseWriter) WriteResponse() {
 	if !w.headerWritten {
 		w.WriteHeader(http.StatusOK)
 	}
@@ -136,13 +259,10 @@ func (w *responseWriter) Flush() {
 	w.conn.Write([]byte(fmt.Sprintf("HTTP/1.1 %d %s\r\n", w.statusCode, statusText)))
 
 	if _, ok := w.headers["Content-Type"]; !ok {
-		w.headers.Set("Content-Type", "text/plain; charset=utf-8")
+		w.headers.Set("Content-Type", "text/html; charset=utf-8")
 	}
 	if _, ok := w.headers["Content-Length"]; !ok {
 		w.headers.Set("Content-Length", fmt.Sprintf("%d", len(w.body)))
-	}
-	if _, ok := w.headers["Connection"]; !ok {
-		w.headers.Set("Connection", "close")
 	}
 
 	for key, values := range w.headers {
@@ -190,14 +310,14 @@ func (pd *ProtocolDetector) handleHTTPRedirect(firstByte []byte, conn net.Conn) 
 	}
 	target := fmt.Sprintf("https://%s%s", host, path)
 	w := bufio.NewWriter(conn)
-	fmt.Fprintf(w, "HTTP/1.1 307 Temporary Redirect\r\n")
-	fmt.Fprintf(w, "Location: %s\r\n", target)
-	fmt.Fprintf(w, "Content-Length: 0\r\n")
-	fmt.Fprintf(w, "Timing-Allow-Origin: *\r\n")
-	fmt.Fprintf(w, "Non-Authoritative-Reason: HSTS\r\n")
-	fmt.Fprintf(w, "x-xss-protection: 0\r\n")
-	fmt.Fprintf(w, "Cross-Origin-Resource-Policy: Cross-Origin\r\n")
-	fmt.Fprintf(w, "\r\n")
-
+	_, _ = fmt.Fprintf(w, "HTTP/1.1 307 Temporary Redirect\r\n")
+	_, _ = fmt.Fprintf(w, "Location: %s\r\n", target)
+	_, _ = fmt.Fprintf(w, "Connection: close\r\n")
+	_, _ = fmt.Fprintf(w, "Content-Length: 0\r\n")
+	_, _ = fmt.Fprintf(w, "Timing-Allow-Origin: *\r\n")
+	_, _ = fmt.Fprintf(w, "Non-Authoritative-Reason: HSTS\r\n")
+	_, _ = fmt.Fprintf(w, "x-xss-protection: 0\r\n")
+	_, _ = fmt.Fprintf(w, "Cross-Origin-Resource-Policy: Cross-Origin\r\n")
+	_, _ = fmt.Fprintf(w, "\r\n")
 	w.Flush()
 }
