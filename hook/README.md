@@ -1,7 +1,7 @@
 
 
 
-// 例子
+// RSA算法例子
 
 ```go
 package main
@@ -52,4 +52,66 @@ func main() {
 
 	fmt.Println(srv.ListenAndServeTLS("server.pem", "server.key"))
 }
+```
+
+
+// 国密算法示例
+```
+// 指定tls版本和算法，剔除不安全的算法(漏扫原因)
+		hook.TlsConfig = &tls.Config{
+			NextProtos:         []string{"http/1.1"},
+			InsecureSkipVerify: true,
+			MaxVersion:         tls.VersionTLS13,
+			MinVersion:         tls.VersionTLS12,
+			CipherSuites: []uint16{
+				// Tls 1.3
+				tls.TLS_AES_128_GCM_SHA256,
+				tls.TLS_AES_256_GCM_SHA384,
+				tls.TLS_CHACHA20_POLY1305_SHA256,
+				// Tls 1.2
+				tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+				tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+				tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
+				tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
+			},
+		}
+		hook.TlcpConfig = &tlcp.Config{
+			InsecureSkipVerify: true,
+			CipherSuites: []uint16{
+				tls.TLS_AES_128_GCM_SHA256,
+				tls.TLS_AES_256_GCM_SHA384,
+				tls.TLS_CHACHA20_POLY1305_SHA256,
+				tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+				tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+				tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
+				tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
+				// 保留最基础的国密加密套件
+				gmtls.GMTLS_ECDHE_SM2_WITH_SM4_SM3,
+				gmtls.GMTLS_SM2_WITH_SM4_SM3,
+			},
+		}
+
+		ln, err := hook.BuildListener(
+            k.Config.TlsMode, // tlsMode包含gm，rsa可以指定算法和auto自动算法
+			k.Config.ListenAddr,
+			k.Config.ServerPem,
+			k.Config.ServerKey,
+			k.Config.GmSignCert,
+			k.Config.GmSignKey,
+			k.Config.GmEncCert,
+			k.Config.GmEncKey,
+		)
+		if err != nil {
+			logrus.Fatalln(err)
+		}
+		defer ln.Close()
+
+		server := &http.Server{
+			Addr:    k.Config.ListenAddr,
+			Handler: k.Engine,
+		}
+
+		if e := server.Serve(ln); e != nil && !errors.Is(e, http.ErrServerClosed) {
+			logrus.Fatalf("启动失败,查看端口是否被占用: %v", e)
+		}
 ```
