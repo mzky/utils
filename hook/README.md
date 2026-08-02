@@ -122,20 +122,20 @@ func main() {
 	log.Println("Starting GM/TLS HTTP/HTTPS Service...")
 	r := gin.Default()
 	pd := &hook.ProtocolDetector{
-	    Addr: ":8080",
 		Handler: r,
+		Addr:    ":443",
 		TLSConfig: &gmtls.Config{
 			InsecureSkipVerify:       true,
 			PreferServerCipherSuites: true,
 			CipherSuites: []uint16{
-				tls.TLS_AES_128_GCM_SHA256,
-				tls.TLS_AES_256_GCM_SHA384,
-				tls.TLS_CHACHA20_POLY1305_SHA256,
+				// RSA 强套件（覆盖三种 AEAD）
+				tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
 				tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-				tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
 				tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
+				// ECDSA 强套件
+				tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
 				tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
-				// 保留最基础的国密加密套件
+				// 国密套件
 				gmtls.GMTLS_ECDHE_SM2_WITH_SM4_SM3,
 				gmtls.GMTLS_SM2_WITH_SM4_SM3,
 			},
@@ -160,7 +160,7 @@ func main() {
 	r.GET("/", handler.Index)
 	r.GET("/health", handler.HealthCheck)
 
-	if err := hook.ListenAndServe(); err != nil {
+	if err := pd.ListenAndServe(tlsConfig); err != nil {
 		log.Fatalf("Server error: %v", err)
 	}
 }

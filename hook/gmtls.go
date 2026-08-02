@@ -16,9 +16,9 @@ import (
 )
 
 type ProtocolDetector struct {
-	TLSConfig *gmtls.Config
-	Handler   http.Handler
 	Addr      string
+	Handler   http.Handler
+	TLSConfig *gmtls.Config
 }
 
 func (pd *ProtocolDetector) BuildTLSConfig(mode, sm2SignCert, sm2SignKey, sm2EncCert, sm2EncKey, stdCert, stdKey string) (*gmtls.Config, error) {
@@ -32,6 +32,22 @@ func (pd *ProtocolDetector) BuildTLSConfig(mode, sm2SignCert, sm2SignKey, sm2Enc
 	default:
 		return nil, fmt.Errorf("不支持的模式 %q，可选值为 tls(rsa)、tlcp(gm)、auto", mode)
 	}
+}
+
+// cloneBaseConfig 基于 pd.TLSConfig 浅拷贝出新的 *gmtls.Config，
+// 继承 main.go 配置的 CipherSuites/MinVersion/MaxVersion/InsecureSkipVerify/
+// PreferServerCipherSuites/GMSupport，确保后续派生 config 的修改不影响 pd.TLSConfig。
+func (pd *ProtocolDetector) cloneBaseConfig() *gmtls.Config {
+	base := pd.TLSConfig
+	derived := &gmtls.Config{
+		InsecureSkipVerify:       base.InsecureSkipVerify,
+		PreferServerCipherSuites: base.PreferServerCipherSuites,
+		CipherSuites:             base.CipherSuites,
+		MinVersion:               base.MinVersion,
+		MaxVersion:               base.MaxVersion,
+		GMSupport:                base.GMSupport,
+	}
+	return derived
 }
 
 func (pd *ProtocolDetector) buildAutoSwitchConfig(sm2SignCert, sm2SignKey, sm2EncCert, sm2EncKey, stdCert, stdKey string) (*gmtls.Config, error) {
@@ -59,12 +75,18 @@ func (pd *ProtocolDetector) buildAutoSwitchConfig(sm2SignCert, sm2SignKey, sm2En
 		}
 	}
 
-	config, err := gmtls.NewBasicAutoSwitchConfig(&sigCert, &encCert, stdCertPtr)
+	autoCfg, err := gmtls.NewBasicAutoSwitchConfig(&sigCert, &encCert, stdCertPtr)
 	if err != nil {
 		return nil, err
 	}
 
-	return config, nil
+	derived := pd.cloneBaseConfig()
+	derived.Certificates = autoCfg.Certificates
+	derived.GMSupport = autoCfg.GMSupport
+	derived.GetCertificate = autoCfg.GetCertificate
+	derived.GetKECertificate = autoCfg.GetKECertificate
+
+	return derived, nil
 }
 
 func (pd *ProtocolDetector) buildGMOnlyConfig(sm2SignCert, sm2SignKey, sm2EncCert, sm2EncKey string) (*gmtls.Config, error) {
@@ -80,10 +102,13 @@ func (pd *ProtocolDetector) buildGMOnlyConfig(sm2SignCert, sm2SignKey, sm2EncCer
 		return nil, err
 	}
 
-	pd.TLSConfig.GMSupport = &gmtls.GMSupport{}
-	pd.TLSConfig.Certificates = []gmtls.Certificate{sigCert, encCert}
+	derived := pd.cloneBaseConfig()
+	derived.Certificates = []gmtls.Certificate{sigCert, encCert}
+	if derived.GMSupport == nil {
+		derived.GMSupport = &gmtls.GMSupport{}
+	}
 
-	return pd.TLSConfig, nil
+	return derived, nil
 }
 
 func (pd *ProtocolDetector) buildStdOnlyConfig(stdCert, stdKey string) (*gmtls.Config, error) {
@@ -93,12 +118,14 @@ func (pd *ProtocolDetector) buildStdOnlyConfig(stdCert, stdKey string) (*gmtls.C
 	if err != nil {
 		return nil, err
 	}
-	pd.TLSConfig.Certificates = []gmtls.Certificate{cert}
 
-	return pd.TLSConfig, nil
+	derived := pd.cloneBaseConfig()
+	derived.Certificates = []gmtls.Certificate{cert}
+
+	return derived, nil
 }
 
-func (pd *ProtocolDetector) ListenAndServe() error {
+func (pd *ProtocolDetector) ListenAndServe(tlsConfig *gmtls.Config) error {
 	lt, err := net.Listen("tcp", pd.Addr)
 	if err != nil {
 		return fmt.Errorf("failed to create listener: %w", err)
@@ -113,6 +140,8 @@ func (pd *ProtocolDetector) ListenAndServe() error {
 		log.Println("Shutting down server...")
 		lt.Close()
 	}()
+
+	pd.TLSConfig = tlsConfig
 
 	for {
 		conn, e := lt.Accept()
