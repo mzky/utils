@@ -18,6 +18,7 @@ import (
 type ProtocolDetector struct {
 	TLSConfig *gmtls.Config
 	Handler   http.Handler
+	Addr      string
 }
 
 func (pd *ProtocolDetector) BuildTLSConfig(mode, sm2SignCert, sm2SignKey, sm2EncCert, sm2EncKey, stdCert, stdKey string) (*gmtls.Config, error) {
@@ -97,12 +98,12 @@ func (pd *ProtocolDetector) buildStdOnlyConfig(stdCert, stdKey string) (*gmtls.C
 	return pd.TLSConfig, nil
 }
 
-func ListenAndServe(addr string, tlsConfig *gmtls.Config, handler http.Handler) error {
-	listener, err := net.Listen("tcp", addr)
+func (pd *ProtocolDetector) ListenAndServe() error {
+	listener, err := net.Listen("tcp", pd.Addr)
 	if err != nil {
 		return fmt.Errorf("failed to create listener: %w", err)
 	}
-	log.Printf("Server starting on %s", addr)
+	log.Printf("Server starting on %s", pd.Addr)
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
@@ -113,18 +114,13 @@ func ListenAndServe(addr string, tlsConfig *gmtls.Config, handler http.Handler) 
 		listener.Close()
 	}()
 
-	detector := &ProtocolDetector{
-		TLSConfig: tlsConfig,
-		Handler:   handler,
-	}
-
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
 			log.Printf("Accept error: %v", err)
 			return nil
 		}
-		go detector.HandleConnection(conn)
+		go pd.HandleConnection(conn)
 	}
 }
 

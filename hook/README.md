@@ -122,6 +122,7 @@ func main() {
 	log.Println("Starting GM/TLS HTTP/HTTPS Service...")
 	r := gin.Default()
 	pd := &hook.ProtocolDetector{
+	    Addr: ":8080",
 		Handler: r,
 		TLSConfig: &gmtls.Config{
 			InsecureSkipVerify:       true,
@@ -159,7 +160,7 @@ func main() {
 	r.GET("/", handler.Index)
 	r.GET("/health", handler.HealthCheck)
 
-	if err := hook.ListenAndServe(":7569", tlsConfig, r); err != nil {
+	if err := hook.ListenAndServe(); err != nil {
 		log.Fatalf("Server error: %v", err)
 	}
 }
