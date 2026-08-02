@@ -99,7 +99,7 @@ func (pd *ProtocolDetector) buildStdOnlyConfig(stdCert, stdKey string) (*gmtls.C
 }
 
 func (pd *ProtocolDetector) ListenAndServe() error {
-	listener, err := net.Listen("tcp", pd.Addr)
+	lt, err := net.Listen("tcp", pd.Addr)
 	if err != nil {
 		return fmt.Errorf("failed to create listener: %w", err)
 	}
@@ -111,13 +111,13 @@ func (pd *ProtocolDetector) ListenAndServe() error {
 	go func() {
 		<-quit
 		log.Println("Shutting down server...")
-		listener.Close()
+		lt.Close()
 	}()
 
 	for {
-		conn, err := listener.Accept()
-		if err != nil {
-			log.Printf("Accept error: %v", err)
+		conn, e := lt.Accept()
+		if e != nil {
+			log.Printf("Accept error: %v", e)
 			return nil
 		}
 		go pd.HandleConnection(conn)
