@@ -111,17 +111,32 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"time"
 
-	"gmtls/hook"
+	"gmtls-demo/hook"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	addr := flag.String("addr", ":7569", "listen address")
+	mode := flag.String("mode", "auto", "algorithm mode: auto, gm, rsa")
 	flag.Parse()
 
 	config := &hook.Config{
+		Mode:            *mode,
+		RSACertFile:     "./certs/rsa.crt",
+		RSAKeyFile:      "./certs/rsa.key",
+		SM2SignCertFile: "./certs/sm2sign.crt",
+		SM2SignKeyFile:  "./certs/sm2sign.key",
+		SM2EncCertFile:  "./certs/sm2enc.crt",
+		SM2EncKeyFile:   "./certs/sm2enc.key",
+		Server: &http.Server{
+			ReadTimeout:       30 * time.Second,
+			ReadHeaderTimeout: 30 * time.Second,
+			WriteTimeout:      30 * time.Second,
+			IdleTimeout:       30 * time.Second,
+		},
 	}
 
 	router := SetupRoutes()

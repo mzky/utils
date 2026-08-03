@@ -3,13 +3,32 @@ package hook
 import (
 	"errors"
 	"fmt"
-	"github.com/sirupsen/logrus"
-	"github.com/soheilhy/cmux"
-	"github.com/tjfoc/gmsm/gmtls"
 	"io"
 	"net"
 	"net/http"
+
+	"github.com/sirupsen/logrus"
+	"github.com/soheilhy/cmux"
+	"github.com/tjfoc/gmsm/gmtls"
 )
+
+const (
+	ModeAuto = "auto"
+	ModeGM   = "gm"
+	ModeRSA  = "rsa"
+)
+
+// 默认 GM 密码套件
+var defaultGMCipherSuites = []uint16{
+	gmtls.GMTLS_SM2_WITH_SM4_SM3,
+	gmtls.GMTLS_ECDHE_SM2_WITH_SM4_SM3,
+}
+
+// 默认 RSA/TLS 密码套件
+var defaultRSACipherSuites = []uint16{
+	gmtls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+	gmtls.TLS_RSA_WITH_AES_128_GCM_SHA256,
+}
 
 // Config 服务器配置结构体
 type Config struct {
@@ -19,11 +38,84 @@ type Config struct {
 	SM2SignKeyFile  string
 	SM2EncCertFile  string
 	SM2EncKeyFile   string
+
+	// Mode 算法模式: auto, gm, rsa
+	Mode string
+	// CipherSuites 自定义密码套件（可选），nil 时使用各模式默认值
+	CipherSuites []uint16
+
+	Server *http.Server
 }
 
-// buildConfig 加载 RSA/SM2 证书并构造支持 GM/RSA 自动切换的 gmtls.Config
-// 通过 GetConfigForClient 为国密客户端和标准 TLS 客户端分别设置独立的算法参数。
+// GetCipherSuites 返回当前模式应使用的密码套件
+func (c *Config) GetCipherSuites() []uint16 {
+	if c.CipherSuites != nil {
+		return c.CipherSuites
+	}
+	switch c.Mode {
+	case ModeGM:
+		return defaultGMCipherSuites
+	case ModeRSA:
+		return defaultRSACipherSuites
+	default:
+		// auto 模式下返回 GM + RSA 所有套件
+		return append(append([]uint16{}, defaultGMCipherSuites...), defaultRSACipherSuites...)
+	}
+}
+
+// buildConfig 根据 Mode 构造 gmtls.Config
 func (c *Config) buildConfig() (*gmtls.Config, error) {
+	switch c.Mode {
+	case ModeGM:
+		return c.buildGMConfig()
+	case ModeRSA:
+		return c.buildRSAConfig()
+	default:
+		return c.buildAutoConfig()
+	}
+}
+
+// buildGMConfig 构建国密模式配置（仅 SM2 证书 + GM 算法套件）
+func (c *Config) buildGMConfig() (*gmtls.Config, error) {
+	sm2SignCert, err := gmtls.LoadX509KeyPair(c.SM2SignCertFile, c.SM2SignKeyFile)
+	if err != nil {
+		return nil, fmt.Errorf("load sm2 sign cert: %w", err)
+	}
+
+	sm2EncCert, err := gmtls.LoadX509KeyPair(c.SM2EncCertFile, c.SM2EncKeyFile)
+	if err != nil {
+		return nil, fmt.Errorf("load sm2 enc cert: %w", err)
+	}
+
+	return &gmtls.Config{
+		GMSupport:    gmtls.NewGMSupport(),
+		Certificates: []gmtls.Certificate{sm2SignCert, sm2EncCert},
+		GetKECertificate: func(info *gmtls.ClientHelloInfo) (*gmtls.Certificate, error) {
+			return &sm2EncCert, nil
+		},
+		CipherSuites: c.GetCipherSuites(),
+		MinVersion:   gmtls.VersionGMSSL,
+		MaxVersion:   gmtls.VersionGMSSL,
+	}, nil
+}
+
+// buildRSAConfig 构建 RSA 模式配置（仅 RSA 证书 + TLS 算法套件）
+func (c *Config) buildRSAConfig() (*gmtls.Config, error) {
+	rsaCert, err := gmtls.LoadX509KeyPair(c.RSACertFile, c.RSAKeyFile)
+	if err != nil {
+		return nil, fmt.Errorf("load rsa cert: %w", err)
+	}
+
+	return &gmtls.Config{
+		Certificates: []gmtls.Certificate{rsaCert},
+		CipherSuites: c.GetCipherSuites(),
+		MinVersion:   gmtls.VersionTLS12,
+		MaxVersion:   gmtls.VersionTLS12,
+	}, nil
+}
+
+// buildAutoConfig 构建自动切换模式配置（GM/RSA 自动协商）
+func (c *Config) buildAutoConfig() (*gmtls.Config, error) {
 	rsaCert, err := gmtls.LoadX509KeyPair(c.RSACertFile, c.RSAKeyFile)
 	if err != nil {
 		return nil, fmt.Errorf("load rsa cert: %w", err)
@@ -39,52 +131,19 @@ func (c *Config) buildConfig() (*gmtls.Config, error) {
 		return nil, fmt.Errorf("load sm2 enc cert: %w", err)
 	}
 
-	// 基础混合配置：根据 ClientHello 版本自动选择 SM2 签名/加密证书或 RSA 证书
-	baseConfig, err := gmtls.NewBasicAutoSwitchConfig(&sm2SignCert, &sm2EncCert, &rsaCert)
+	config, err := gmtls.NewBasicAutoSwitchConfig(&sm2SignCert, &sm2EncCert, &rsaCert)
 	if err != nil {
 		return nil, fmt.Errorf("new auto switch config: %w", err)
 	}
 
-	// 在握手前返回针对当前协议的独立配置,实现 GM/RSA 独立算法参数
-	baseConfig.GetConfigForClient = func(hello *gmtls.ClientHelloInfo) (*gmtls.Config, error) {
-		if isGMSSL(hello) {
-			cfg := baseConfig.Clone()
-			cfg.GetKECertificate = baseConfig.GetKECertificate
-			cfg.GMSupport = gmtls.NewGMSupport()
-			cfg.Certificates = []gmtls.Certificate{sm2SignCert, sm2EncCert}
-			cfg.CipherSuites = []uint16{
-				gmtls.GMTLS_SM2_WITH_SM4_SM3,
-				gmtls.GMTLS_ECDHE_SM2_WITH_SM4_SM3,
-			}
-			cfg.MinVersion = gmtls.VersionGMSSL
-			cfg.MaxVersion = gmtls.VersionGMSSL
-			cfg.InsecureSkipVerify = true
-			return cfg, nil
-		}
+	// 应用自定义密码套件（如果指定）
+	config.CipherSuites = c.GetCipherSuites()
 
-		cfg := baseConfig.Clone()
-		cfg.GMSupport = nil
-		cfg.Certificates = []gmtls.Certificate{rsaCert}
-		cfg.CipherSuites = []uint16{
-			gmtls.TLS_RSA_WITH_AES_128_GCM_SHA256,
-			gmtls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-		}
-		cfg.MinVersion = gmtls.VersionTLS12
-		cfg.MaxVersion = gmtls.VersionTLS12
-		cfg.InsecureSkipVerify = true
-		return cfg, nil
-	}
+	// 允许 GMSSL 到 TLS1.2 的版本协商
+	config.MinVersion = gmtls.VersionGMSSL
+	config.MaxVersion = gmtls.VersionTLS12
 
-	return baseConfig, nil
-}
-
-func isGMSSL(hello *gmtls.ClientHelloInfo) bool {
-	for _, v := range hello.SupportedVersions {
-		if v == gmtls.VersionGMSSL {
-			return true
-		}
-	}
-	return false
+	return config, nil
 }
 
 // StartMixedServer 在 addr 单一端口上同时监听 HTTPS（gmtls,支持 GM/RSA 自动切换）
@@ -109,8 +168,12 @@ func (c *Config) StartMixedServer(addr string, handler http.Handler) error {
 
 	gmtlsListener := gmtls.NewListener(tlsListener, config)
 
-	httpsServer := &http.Server{Handler: handler}
-	httpServer := &http.Server{Handler: redirectHandler()}
+	templateSrv := c.Server
+	httpsServer := *templateSrv
+	httpsServer.Handler = handler
+
+	httpServer := *templateSrv
+	httpServer.Handler = redirectHandler()
 
 	go func() {
 		if e := httpsServer.Serve(gmtlsListener); e != nil && !errors.Is(e, cmux.ErrListenerClosed) {
