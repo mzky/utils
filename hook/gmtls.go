@@ -146,6 +146,17 @@ func (c *Config) buildAutoConfig() (*gmtls.Config, error) {
 	return config, nil
 }
 
+func newServerFromTemplate(template *http.Server, handler http.Handler) *http.Server {
+	if template == nil {
+		return &http.Server{
+			Handler: handler,
+		}
+	}
+	s := *template
+	s.Handler = handler
+	return &s
+}
+
 // StartMixedServer 在 addr 单一端口上同时监听 HTTPS（gmtls,支持 GM/RSA 自动切换）
 // 与 HTTP,对所有 HTTP 请求返回 307 重定向到同地址 HTTPS。
 func (c *Config) StartMixedServer(addr string, handler http.Handler) error {
@@ -168,12 +179,8 @@ func (c *Config) StartMixedServer(addr string, handler http.Handler) error {
 
 	gmtlsListener := gmtls.NewListener(tlsListener, config)
 
-	templateSrv := c.Server
-	httpsServer := *templateSrv
-	httpsServer.Handler = handler
-
-	httpServer := *templateSrv
-	httpServer.Handler = redirectHandler()
+	httpsServer := newServerFromTemplate(c.Server, handler)
+	httpServer := newServerFromTemplate(c.Server, redirectHandler())
 
 	go func() {
 		if e := httpsServer.Serve(gmtlsListener); e != nil && !errors.Is(e, cmux.ErrListenerClosed) {
