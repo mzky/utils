@@ -18,14 +18,14 @@ const (
 	ModeRSA  = "rsa"
 )
 
-// 默认 GM 密码套件
-var defaultGMCipherSuites = []uint16{
+// DefaultGMCipherSuites 默认 GM 密码套件
+var DefaultGMCipherSuites = []uint16{
 	gmtls.GMTLS_SM2_WITH_SM4_SM3,
 	gmtls.GMTLS_ECDHE_SM2_WITH_SM4_SM3,
 }
 
-// 默认 RSA/TLS 密码套件
-var defaultRSACipherSuites = []uint16{
+// DefaultRSACipherSuites 默认 RSA/TLS 密码套件
+var DefaultRSACipherSuites = []uint16{
 	gmtls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
 	gmtls.TLS_RSA_WITH_AES_128_GCM_SHA256,
 }
@@ -54,12 +54,12 @@ func (c *Config) GetCipherSuites() []uint16 {
 	}
 	switch c.Mode {
 	case ModeGM:
-		return defaultGMCipherSuites
+		return DefaultGMCipherSuites
 	case ModeRSA:
-		return defaultRSACipherSuites
+		return DefaultRSACipherSuites
 	default:
 		// auto 模式下返回 GM + RSA 所有套件
-		return append(append([]uint16{}, defaultGMCipherSuites...), defaultRSACipherSuites...)
+		return append(append([]uint16{}, DefaultGMCipherSuites...), DefaultRSACipherSuites...)
 	}
 }
 
