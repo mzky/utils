@@ -108,60 +108,45 @@ func main() {
 package main
 
 import (
-	"crypto/tls"
+	"flag"
 	"log"
+	"net/http"
+
+	"gmtls/hook"
 
 	"github.com/gin-gonic/gin"
-	"github.com/tjfoc/gmsm/gmtls"
-
-	"autotls/handler"
-	"autotls/hook"
 )
 
 func main() {
-	log.Println("Starting GM/TLS HTTP/HTTPS Service...")
+	addr := flag.String("addr", ":7569", "listen address")
+	flag.Parse()
+
+	config := &hook.Config{
+	}
+
+	router := SetupRoutes()
+
+	if err := config.StartMixedServer(*addr, router); err != nil {
+		log.Fatalf("start server: %v", err)
+	}
+}
+
+// SetupRoutes 创建并配置 gin 路由
+func SetupRoutes() *gin.Engine {
 	r := gin.Default()
-	pd := &hook.ProtocolDetector{
-		Handler: r,
-		Addr:    ":443",
-		TLSConfig: &gmtls.Config{
-			InsecureSkipVerify:       true,
-			PreferServerCipherSuites: true,
-			CipherSuites: []uint16{
-				// RSA 强套件（覆盖三种 AEAD）
-				tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-				tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-				tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
-				// ECDSA 强套件
-				tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-				tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
-				// 国密套件
-				gmtls.GMTLS_ECDHE_SM2_WITH_SM4_SM3,
-				gmtls.GMTLS_SM2_WITH_SM4_SM3,
-			},
-			MinVersion: gmtls.VersionGMSSL,
-			MaxVersion: tls.VersionTLS13,
-		},
-	}
 
-	tlsConfig, err := pd.BuildTLSConfig(
-		"auto",
-		"./certs/server_sign.crt",
-		"./certs/server_sign.key",
-		"./certs/server_enc.crt",
-		"./certs/server_enc.key",
-		"./certs/server_std.crt",
-		"./certs/server_std.key",
-	)
-	if err != nil {
-		log.Fatalf("Failed to build TLS config: %v", err)
-	}
+	r.GET("/", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"status": "ok",
+			"path":   c.Request.URL.Path,
+			"proto":  "https",
+		})
+	})
 
-	r.GET("/", handler.Index)
-	r.GET("/health", handler.HealthCheck)
+	r.GET("/health", func(c *gin.Context) {
+		c.String(http.StatusOK, "ok")
+	})
 
-	if err := pd.ListenAndServe(tlsConfig); err != nil {
-		log.Fatalf("Server error: %v", err)
-	}
+	return r
 }
 ```

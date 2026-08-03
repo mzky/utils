@@ -1,337 +1,155 @@
 package hook
 
 import (
-	"bufio"
+	"errors"
 	"fmt"
-	"log"
+	"github.com/sirupsen/logrus"
+	"github.com/soheilhy/cmux"
+	"github.com/tjfoc/gmsm/gmtls"
+	"io"
 	"net"
 	"net/http"
-	"os"
-	"os/signal"
-	"strings"
-	"syscall"
-	"time"
-
-	"github.com/tjfoc/gmsm/gmtls"
 )
 
-type ProtocolDetector struct {
-	Addr      string
-	Handler   http.Handler
-	TLSConfig *gmtls.Config
+// Config 服务器配置结构体
+type Config struct {
+	RSACertFile     string
+	RSAKeyFile      string
+	SM2SignCertFile string
+	SM2SignKeyFile  string
+	SM2EncCertFile  string
+	SM2EncKeyFile   string
 }
 
-func (pd *ProtocolDetector) BuildTLSConfig(mode, sm2SignCert, sm2SignKey, sm2EncCert, sm2EncKey, stdCert, stdKey string) (*gmtls.Config, error) {
-	switch mode {
-	case "gm", "tlcp", "gmtls":
-		return pd.buildGMOnlyConfig(sm2SignCert, sm2SignKey, sm2EncCert, sm2EncKey)
-	case "std", "rsa", "tls":
-		return pd.buildStdOnlyConfig(stdCert, stdKey)
-	case "auto":
-		return pd.buildAutoSwitchConfig(sm2SignCert, sm2SignKey, sm2EncCert, sm2EncKey, stdCert, stdKey)
-	default:
-		return nil, fmt.Errorf("不支持的模式 %q，可选值为 tls(rsa)、tlcp(gm)、auto", mode)
-	}
-}
-
-// cloneBaseConfig 基于 pd.TLSConfig 浅拷贝出新的 *gmtls.Config，
-// 继承 main.go 配置的 CipherSuites/MinVersion/MaxVersion/InsecureSkipVerify/
-// PreferServerCipherSuites/GMSupport，确保后续派生 config 的修改不影响 pd.TLSConfig。
-func (pd *ProtocolDetector) cloneBaseConfig() *gmtls.Config {
-	base := pd.TLSConfig
-	derived := &gmtls.Config{
-		InsecureSkipVerify:       base.InsecureSkipVerify,
-		PreferServerCipherSuites: base.PreferServerCipherSuites,
-		CipherSuites:             base.CipherSuites,
-		MinVersion:               base.MinVersion,
-		MaxVersion:               base.MaxVersion,
-		GMSupport:                base.GMSupport,
-	}
-	return derived
-}
-
-func (pd *ProtocolDetector) buildAutoSwitchConfig(sm2SignCert, sm2SignKey, sm2EncCert, sm2EncKey, stdCert, stdKey string) (*gmtls.Config, error) {
-	log.Println("TLS Mode: Auto Switch (GM + Standard)")
-
-	sigCert, err := gmtls.LoadX509KeyPair(sm2SignCert, sm2SignKey)
+// buildConfig 加载 RSA/SM2 证书并构造支持 GM/RSA 自动切换的 gmtls.Config
+// 通过 GetConfigForClient 为国密客户端和标准 TLS 客户端分别设置独立的算法参数。
+func (c *Config) buildConfig() (*gmtls.Config, error) {
+	rsaCert, err := gmtls.LoadX509KeyPair(c.RSACertFile, c.RSAKeyFile)
 	if err != nil {
-		log.Printf("Warning: Failed to load SM2 sign certificate: %v", err)
-		return pd.buildStdOnlyConfig(stdCert, stdKey)
+		return nil, fmt.Errorf("load rsa cert: %w", err)
 	}
 
-	encCert, err := gmtls.LoadX509KeyPair(sm2EncCert, sm2EncKey)
+	sm2SignCert, err := gmtls.LoadX509KeyPair(c.SM2SignCertFile, c.SM2SignKeyFile)
 	if err != nil {
-		log.Printf("Warning: Failed to load SM2 encrypt certificate: %v", err)
-		return pd.buildStdOnlyConfig(stdCert, stdKey)
+		return nil, fmt.Errorf("load sm2 sign cert: %w", err)
 	}
 
-	var stdCertPtr *gmtls.Certificate
-	if stdCert != "" && stdKey != "" {
-		cert, err := gmtls.LoadX509KeyPair(stdCert, stdKey)
-		if err != nil {
-			log.Printf("Warning: Failed to load standard certificate: %v", err)
-		} else {
-			stdCertPtr = &cert
+	sm2EncCert, err := gmtls.LoadX509KeyPair(c.SM2EncCertFile, c.SM2EncKeyFile)
+	if err != nil {
+		return nil, fmt.Errorf("load sm2 enc cert: %w", err)
+	}
+
+	// 基础混合配置：根据 ClientHello 版本自动选择 SM2 签名/加密证书或 RSA 证书
+	baseConfig, err := gmtls.NewBasicAutoSwitchConfig(&sm2SignCert, &sm2EncCert, &rsaCert)
+	if err != nil {
+		return nil, fmt.Errorf("new auto switch config: %w", err)
+	}
+
+	// 在握手前返回针对当前协议的独立配置,实现 GM/RSA 独立算法参数
+	baseConfig.GetConfigForClient = func(hello *gmtls.ClientHelloInfo) (*gmtls.Config, error) {
+		if isGMSSL(hello) {
+			cfg := baseConfig.Clone()
+			cfg.GetKECertificate = baseConfig.GetKECertificate
+			cfg.GMSupport = gmtls.NewGMSupport()
+			cfg.Certificates = []gmtls.Certificate{sm2SignCert, sm2EncCert}
+			cfg.CipherSuites = []uint16{
+				gmtls.GMTLS_SM2_WITH_SM4_SM3,
+				gmtls.GMTLS_ECDHE_SM2_WITH_SM4_SM3,
+			}
+			cfg.MinVersion = gmtls.VersionGMSSL
+			cfg.MaxVersion = gmtls.VersionGMSSL
+			cfg.InsecureSkipVerify = true
+			return cfg, nil
+		}
+
+		cfg := baseConfig.Clone()
+		cfg.GMSupport = nil
+		cfg.Certificates = []gmtls.Certificate{rsaCert}
+		cfg.CipherSuites = []uint16{
+			gmtls.TLS_RSA_WITH_AES_128_GCM_SHA256,
+			gmtls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+		}
+		cfg.MinVersion = gmtls.VersionTLS12
+		cfg.MaxVersion = gmtls.VersionTLS12
+		cfg.InsecureSkipVerify = true
+		return cfg, nil
+	}
+
+	return baseConfig, nil
+}
+
+func isGMSSL(hello *gmtls.ClientHelloInfo) bool {
+	for _, v := range hello.SupportedVersions {
+		if v == gmtls.VersionGMSSL {
+			return true
 		}
 	}
-
-	autoCfg, err := gmtls.NewBasicAutoSwitchConfig(&sigCert, &encCert, stdCertPtr)
-	if err != nil {
-		return nil, err
-	}
-
-	derived := pd.cloneBaseConfig()
-	derived.Certificates = autoCfg.Certificates
-	derived.GMSupport = autoCfg.GMSupport
-	derived.GetCertificate = autoCfg.GetCertificate
-	derived.GetKECertificate = autoCfg.GetKECertificate
-
-	return derived, nil
+	return false
 }
 
-func (pd *ProtocolDetector) buildGMOnlyConfig(sm2SignCert, sm2SignKey, sm2EncCert, sm2EncKey string) (*gmtls.Config, error) {
-	log.Println("TLS Mode: GM Only")
-
-	sigCert, err := gmtls.LoadX509KeyPair(sm2SignCert, sm2SignKey)
+// StartMixedServer 在 addr 单一端口上同时监听 HTTPS（gmtls,支持 GM/RSA 自动切换）
+// 与 HTTP,对所有 HTTP 请求返回 307 重定向到同地址 HTTPS。
+func (c *Config) StartMixedServer(addr string, handler http.Handler) error {
+	config, err := c.buildConfig()
 	if err != nil {
-		return nil, err
+		return fmt.Errorf("build config: %w", err)
 	}
 
-	encCert, err := gmtls.LoadX509KeyPair(sm2EncCert, sm2EncKey)
+	ltr, err := net.Listen("tcp", addr)
 	if err != nil {
-		return nil, err
+		return fmt.Errorf("listen %s: %w", addr, err)
 	}
 
-	derived := pd.cloneBaseConfig()
-	derived.Certificates = []gmtls.Certificate{sigCert, encCert}
-	if derived.GMSupport == nil {
-		derived.GMSupport = &gmtls.GMSupport{}
-	}
+	m := cmux.New(ltr)
 
-	return derived, nil
-}
+	// TLS/GMSSL 匹配：首字节 0x16 为握手记录,后两字节为协议版本
+	tlsListener := m.Match(cmux.Matcher(isTLSRecord))
+	// 其余流量均视为 HTTP,返回 307 重定向
+	httpListener := m.Match(cmux.Any())
 
-func (pd *ProtocolDetector) buildStdOnlyConfig(stdCert, stdKey string) (*gmtls.Config, error) {
-	log.Println("TLS Mode: Standard Only")
+	gmtlsListener := gmtls.NewListener(tlsListener, config)
 
-	cert, err := gmtls.LoadX509KeyPair(stdCert, stdKey)
-	if err != nil {
-		return nil, err
-	}
-
-	derived := pd.cloneBaseConfig()
-	derived.Certificates = []gmtls.Certificate{cert}
-
-	return derived, nil
-}
-
-func (pd *ProtocolDetector) ListenAndServe(tlsConfig *gmtls.Config) error {
-	lt, err := net.Listen("tcp", pd.Addr)
-	if err != nil {
-		return fmt.Errorf("failed to create listener: %w", err)
-	}
-	log.Printf("Server starting on %s", pd.Addr)
-
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	httpsServer := &http.Server{Handler: handler}
+	httpServer := &http.Server{Handler: redirectHandler()}
 
 	go func() {
-		<-quit
-		log.Println("Shutting down server...")
-		lt.Close()
+		if e := httpsServer.Serve(gmtlsListener); e != nil && !errors.Is(e, cmux.ErrListenerClosed) {
+			logrus.Debugf("https server error: %v", e)
+		}
 	}()
 
-	pd.TLSConfig = tlsConfig
-
-	for {
-		conn, e := lt.Accept()
-		if e != nil {
-			log.Printf("Accept error: %v", e)
-			return nil
+	go func() {
+		if e := httpServer.Serve(httpListener); e != nil && !errors.Is(e, cmux.ErrListenerClosed) {
+			logrus.Debugf("http server error: %v", e)
 		}
-		go pd.HandleConnection(conn)
+	}()
+
+	logrus.Debugf("Listening on %s (HTTP->HTTPS redirect, GM/RSA auto-switch)", addr)
+	return m.Serve()
+}
+
+// isTLSRecord 判断 reader 前 3 字节是否为 TLS/GMSSL 记录层头部
+func isTLSRecord(r io.Reader) bool {
+	buf := make([]byte, 3)
+	if _, err := io.ReadFull(r, buf); err != nil {
+		return false
 	}
-}
-
-func (pd *ProtocolDetector) HandleConnection(conn net.Conn) {
-	defer conn.Close()
-
-	buf := make([]byte, 1)
-	n, err := conn.Read(buf)
-	if err != nil || n != 1 {
-		return
+	if buf[0] != 0x16 {
+		return false
 	}
-
-	if buf[0] == 0x16 {
-		pc := &prefixedConn{prefix: buf, conn: conn}
-		tlsConn := gmtls.Server(pc, pd.TLSConfig)
-		if err := tlsConn.Handshake(); err != nil {
-			return
-		}
-		bufConn := bufio.NewReader(tlsConn)
-		for {
-			req, err := http.ReadRequest(bufConn)
-			if err != nil {
-				break
-			}
-			w := &responseWriter{
-				conn:    tlsConn,
-				headers: make(http.Header),
-			}
-			pd.Handler.ServeHTTP(w, req)
-			w.WriteHeaderIfNotWritten()
-			w.WriteResponse()
-			if req.Close {
-				break
-			}
-		}
-	} else {
-		pd.handleHTTPRedirect(buf, conn)
+	version := uint16(buf[1])<<8 | uint16(buf[2])
+	switch version {
+	case gmtls.VersionGMSSL, gmtls.VersionSSL30, gmtls.VersionTLS10,
+		gmtls.VersionTLS11, gmtls.VersionTLS12:
+		return true
 	}
+	return false
 }
 
-type prefixedConn struct {
-	prefix []byte
-	conn   net.Conn
-}
-
-func (pc *prefixedConn) Read(p []byte) (n int, err error) {
-	if len(pc.prefix) > 0 {
-		n = copy(p, pc.prefix)
-		pc.prefix = pc.prefix[n:]
-		return n, nil
-	}
-	return pc.conn.Read(p)
-}
-
-func (pc *prefixedConn) Write(p []byte) (n int, err error) {
-	return pc.conn.Write(p)
-}
-
-func (pc *prefixedConn) Close() error {
-	return pc.conn.Close()
-}
-
-func (pc *prefixedConn) LocalAddr() net.Addr {
-	return pc.conn.LocalAddr()
-}
-
-func (pc *prefixedConn) RemoteAddr() net.Addr {
-	return pc.conn.RemoteAddr()
-}
-
-func (pc *prefixedConn) SetDeadline(t time.Time) error {
-	return pc.conn.SetDeadline(t)
-}
-
-func (pc *prefixedConn) SetReadDeadline(t time.Time) error {
-	return pc.conn.SetReadDeadline(t)
-}
-
-func (pc *prefixedConn) SetWriteDeadline(t time.Time) error {
-	return pc.conn.SetWriteDeadline(t)
-}
-
-type responseWriter struct {
-	conn          net.Conn
-	headers       http.Header
-	statusCode    int
-	body          []byte
-	headerWritten bool
-}
-
-func (w *responseWriter) Header() http.Header {
-	return w.headers
-}
-
-func (w *responseWriter) Write(p []byte) (n int, err error) {
-	w.body = append(w.body, p...)
-	return len(p), nil
-}
-
-func (w *responseWriter) WriteHeader(statusCode int) {
-	if w.headerWritten {
-		return
-	}
-	w.statusCode = statusCode
-	w.headerWritten = true
-}
-
-func (w *responseWriter) WriteHeaderIfNotWritten() {
-	if !w.headerWritten {
-		w.statusCode = http.StatusOK
-		w.headerWritten = true
-	}
-}
-
-func (w *responseWriter) WriteResponse() {
-	if !w.headerWritten {
-		w.WriteHeader(http.StatusOK)
-	}
-
-	statusText := http.StatusText(w.statusCode)
-	w.conn.Write([]byte(fmt.Sprintf("HTTP/1.1 %d %s\r\n", w.statusCode, statusText)))
-
-	if _, ok := w.headers["Content-Type"]; !ok {
-		w.headers.Set("Content-Type", "text/html; charset=utf-8")
-	}
-	if _, ok := w.headers["Content-Length"]; !ok {
-		w.headers.Set("Content-Length", fmt.Sprintf("%d", len(w.body)))
-	}
-
-	for key, values := range w.headers {
-		for _, value := range values {
-			w.conn.Write([]byte(fmt.Sprintf("%s: %s\r\n", key, value)))
-		}
-	}
-
-	w.conn.Write([]byte("\r\n"))
-	w.conn.Write(w.body)
-}
-
-func (pd *ProtocolDetector) handleHTTPRedirect(firstByte []byte, conn net.Conn) {
-	reader := bufio.NewReader(&prefixedConn{prefix: firstByte, conn: conn})
-	line, err := reader.ReadString('\n')
-	if err != nil {
-		return
-	}
-	parts := strings.SplitN(strings.TrimSpace(line), " ", 3)
-	if len(parts) < 2 {
-		return
-	}
-	path := parts[1]
-	host := ""
-	for {
-		headerLine, err := reader.ReadString('\n')
-		if err != nil {
-			break
-		}
-		headerLine = strings.TrimSpace(headerLine)
-		if headerLine == "" {
-			break
-		}
-		if strings.HasPrefix(strings.ToLower(headerLine), "host:") {
-			host = strings.TrimSpace(strings.SplitN(headerLine, ":", 2)[1])
-			break
-		}
-	}
-	if host == "" {
-		host = "localhost"
-	}
-	if !strings.Contains(host, ":") {
-		_, port, _ := net.SplitHostPort(conn.LocalAddr().String())
-		host = fmt.Sprintf("%s:%s", host, port)
-	}
-	target := fmt.Sprintf("https://%s%s", host, path)
-	w := bufio.NewWriter(conn)
-	_, _ = fmt.Fprintf(w, "HTTP/1.1 307 Temporary Redirect\r\n")
-	_, _ = fmt.Fprintf(w, "Location: %s\r\n", target)
-	_, _ = fmt.Fprintf(w, "Connection: close\r\n")
-	_, _ = fmt.Fprintf(w, "Content-Length: 0\r\n")
-	_, _ = fmt.Fprintf(w, "Timing-Allow-Origin: *\r\n")
-	_, _ = fmt.Fprintf(w, "Non-Authoritative-Reason: HSTS\r\n")
-	_, _ = fmt.Fprintf(w, "x-xss-protection: 0\r\n")
-	_, _ = fmt.Fprintf(w, "Cross-Origin-Resource-Policy: Cross-Origin\r\n")
-	_, _ = fmt.Fprintf(w, "\r\n")
-	w.Flush()
+// redirectHandler 返回 307 Temporary Redirect,跳转到同源 HTTPS 地址
+func redirectHandler() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		target := "https://" + r.Host + r.URL.RequestURI()
+		http.Redirect(w, r, target, http.StatusTemporaryRedirect)
+	})
 }

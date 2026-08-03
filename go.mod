@@ -11,6 +11,7 @@ require (
 	github.com/mzky/zip v0.0.0-20240709011722-16a3ac64cd1d
 	github.com/satori/go.uuid v1.2.1-0.20181028125025-b2ce2384e17b
 	github.com/sirupsen/logrus v1.9.3
+	github.com/soheilhy/cmux v0.1.5
 	github.com/spf13/viper v1.20.1
 	github.com/tjfoc/gmsm v1.4.1
 	golang.org/x/image v0.29.0
